@@ -12,6 +12,7 @@
         <java.version>17</java.version>
         <spring.boot.version>3.2.5</spring.boot.version>
         <camunda.version>7.23.0</camunda.version>
+        <lombok.version>1.18.46</lombok.version>
         <maven.compiler.release>17</maven.compiler.release>
     </properties>
 
@@ -40,7 +41,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.32</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -100,6 +101,13 @@
                 <version>3.11.0</version>
                 <configuration>
                     <release>${java.version}</release>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                     <compilerArgs>
                         <arg>-parameters</arg>
                     </compilerArgs>

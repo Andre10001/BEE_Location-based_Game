@@ -38,7 +38,7 @@ import {
 } from './slot-fill';
 
 import PanelContainer from './resizable-container/PanelContainer';
- 
+
 import Panel from './panel/Panel';
 
 import LintingTab from './panel/tabs/linting/LintingTab';

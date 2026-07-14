@@ -21,7 +21,7 @@ BEE/
 ├── camunda-modeler/          # Extended Camunda Modeler
 │   ├── resources/
 │   │   └── plugins/
-│   │       └── BPMNEnv-Aware-Plugins/  # Custom BPMN plugin
+│   │       └── EaBPM/  # Custom BPMN plugin
 │   ├── app/                  # Electron app
 │   └── client/              # React client
 ├── bpenv-modeler/           # BPENV Modeler library (React components)
@@ -30,65 +30,63 @@ BEE/
 
 ```
 
-## 🚀 Quick Start
+## 🚀 Quick Start: Run the Tool Locally
 
 ### Prerequisites
 
 - **Node.js** (v18 or higher)
 - **npm** (v9 or higher)
-- **Docker** and **Docker Compose** (for Keycloak/PostgreSQL)
-- **Java** (JDK 11+) - for the BPMN engine
+- **Java** (JDK 17) - for the BPMN engine
 - **Maven** - for building the Java engine
 
-### 1. Install Dependencies
+### 1. One-Time Setup
 
-**Important:** Install and build `bpenv-modeler` first, as `camunda-modeler` depends on it.
+Run these commands from the repository root the first time you set up the project.
 
-#### BPENV Modeler Library (Required First)
+**Important:** `bpenv-modeler` must be installed and built before installing `camunda-modeler`, because the modeler and the BEE plugin reference it through local `file:` dependencies.
 
 ```bash
 cd bpenv-modeler
 npm install
 npm run build
-```
 
-#### Extended Camunda Modeler
-
-```bash
-cd camunda-modeler
+cd ../camunda-modeler
 npm run install-all
-```
 
-This will:
-1. Install dependencies for the BEE plugin (`resources/plugins/BPMNEnv-Aware-Plugins`)
-2. Install dependencies for the Camunda Modeler
-
-**Note:** Make sure `bpenv-modeler` is built before running `install-all`, as the Camunda Modeler references it via local file path.
-
-#### Java BPMN Engine
-
-```bash
-cd camunda-bpmn-engine
+cd ../camunda-bpmn-engine
 mvn clean install
 ```
 
-### 2. Usage
+`npm run install-all` installs both:
 
-Run these commands in two separate terminals.
+1. The BEE plugin dependencies (`camunda-modeler/resources/plugins/EaBPM`)
+2. The Camunda Modeler dependencies
 
-**Extended Camunda Modeler**
+### 2. Start the Applications
+
+Run the modeler and the engine from the repository root in two separate terminals.
+
+**Terminal 1 - Extended Camunda Modeler**
 
 ```bash
 cd camunda-modeler
-npm run dev:plugin
+npm run dev:plugin:watch
 ```
 
-**BEE BPMN Engine**
+`dev:plugin:watch` is the recommended development command. It builds the BEE plugin, builds `bpenv-modeler`, builds the preload script, then starts the Electron app, the React client, and the relevant watch processes.
+
+If the Electron window appears blank during the first startup, wait 30-60 seconds. The client and plugin may still be compiling.
+
+**Terminal 2 - BEE BPMN Engine**
 
 ```bash
 cd camunda-bpmn-engine
 mvn spring-boot:run
 ```
+
+### Windows Users
+
+If you are on Windows, use **Git Bash** to run the Camunda Modeler commands. Building the modeler from PowerShell/CMD may fail because of a known Camunda Modeler build issue. See this [forum discussion](https://forum.camunda.io/t/cant-build-camunda-modeler/15177/4) for more details.
 
 ### Web Access
 
@@ -104,37 +102,43 @@ If `app.scenario` is not specified in `camunda-bpmn-engine/src/main/resources/ap
 
 **GPS Disclaimer**: when testing the BEE Mobile App from a mobile phone, GPS coordinates are sent from the browser and require an HTTPS connection. For this reason, you will need to expose your local engine through a tunneling tool (for example `ngrok` or similar). As an alternative, you can set the position manually in the app.
 
-## 🛠️ Development
+## 🛠️ Optional Development Commands
 
 ### Camunda Modeler
 
-#### Development with BEE Plugin
+**Start with hot reload (recommended):**
 
-**⚠️ Windows Users:** If you're on Windows, use **Git Bash** to run these commands, as there is a bug when building on Windows devices with PowerShell/CMD. See [this forum discussion](https://forum.camunda.io/t/cant-build-camunda-modeler/15177/4) for more details.
-
-**Initial Setup:**
-```bash
-cd camunda-modeler
-npm run all
-npm run build
-npm run dev:plugin
-```
-
-**⚠️ Important:** After running `npm run dev:plugin` or `npm run dev:plugin:watch`, if the Electron app window appears empty or blank, **wait a bit** (30-60 seconds) as it may still be completing the initial setup and building processes. If it's still white/empty after waiting, then you can run the dev command again.
-
-**Development with Hot Reload (Recommended):**
 ```bash
 cd camunda-modeler
 npm run dev:plugin:watch
 ```
 
-This will:
-1. **First** (sequentially): Build the BEE plugin, build `bpenv-modeler`, and build the preload script
-2. **Then** (in parallel): Start watch modes for `bpenv-modeler` and the BEE plugin, and start the Electron app and React client in dev mode
+**Start without watch mode:**
 
-**Note:** The `dev:plugin:watch` command ensures all dependencies are built first, then runs all watch processes in parallel. Changes to `bpenv-modeler` will automatically rebuild and be available in the Camunda Modeler without manual rebuilds. The initial sequential build prevents race conditions during startup.
+```bash
+cd camunda-modeler
+npm run dev:plugin
+```
 
-**⚠️ Important:** After initial setup, when running `npm run dev:plugin` or `npm run dev:plugin:watch`, if the Electron app window appears empty or blank, **wait a bit** (30-60 seconds) as it may still be completing the initial setup and building processes. Do **not** run the dev command again immediately, as this could interfere with the ongoing build process.
+Use `dev:plugin` only when you do not need automatic rebuilds. If you change `bpenv-modeler`, rebuild it manually with `cd ../bpenv-modeler && npm run build`. If you change the plugin, rebuild it with `npm run eabpm-plugin:build`.
+
+**Build the packaged desktop application:**
+
+```bash
+cd camunda-modeler
+npm run build
+```
+
+This creates distributable desktop artifacts. It is not required to run the modeler locally. On macOS this step may involve application signing and can fail because of local code-signing or Finder metadata issues.
+
+**Run the full Camunda Modeler validation/build pipeline:**
+
+```bash
+cd camunda-modeler
+npm run all
+```
+
+This runs clean, lint, tests, and distributable builds. It is intended for validation/release workflows, not for simply starting the tool.
 
 ### BPENV Modeler Library
 
@@ -147,12 +151,12 @@ npm run test     # Run tests
 
 ### Plugin Development
 
-The BEE plugin is located at `camunda-modeler/resources/plugins/BPMNEnv-Aware-Plugins/`.
+The BEE plugin is located at `camunda-modeler/resources/plugins/EaBPM/`.
 
 **Building the plugin:**
 
 ```bash
-cd camunda-modeler/resources/plugins/BPMNEnv-Aware-Plugins
+cd camunda-modeler/resources/plugins/EaBPM
 npm install
 npm run build        # Production build
 npm run dev          # Watch mode for development
@@ -190,7 +194,7 @@ Custom Camunda Modeler plugin that extends BPMN modeling with:
 - Custom palette entries
 - Replace menu extensions
 
-**Location:** `camunda-modeler/resources/plugins/BPMNEnv-Aware-Plugins/`
+**Location:** `camunda-modeler/resources/plugins/EaBPM/`
 
 ### Java BPMN Engine
 
@@ -262,35 +266,25 @@ Database data is stored locally in the `./postgres_data` folder.
 The `camunda-modeler` and the BEE plugin reference `bpenv-modeler` using the `file:` protocol:
 
 - `camunda-modeler/package.json`: `"bpenv-modeler": "file:../bpenv-modeler"`
-- `camunda-modeler/resources/plugins/BPMNEnv-Aware-Plugins/package.json`: `"bpenv-modeler": "file:../../../../bpenv-modeler"`
+- `camunda-modeler/resources/plugins/EaBPM/package.json`: `"bpenv-modeler": "file:../../../../bpenv-modeler"`
 
 This ensures they use the local version of `bpenv-modeler` instead of the npm package.
 
 ## 📝 Development Workflow
 
-1. **Initial Setup:**
-   ```bash
-   # Build bpenv-modeler first (required dependency)
-   cd bpenv-modeler
-   npm install && npm run build
-   
-   # Then install all dependencies for camunda-modeler
-   cd ../camunda-modeler
-   npm run install-all
-   ```
+For everyday development, use the Quick Start setup once, then run:
 
-2. **Daily Development:**
-   ```bash
-   cd camunda-modeler
-   npm run dev:plugin:watch    # Recommended: with hot reload for bpenv-modeler and plugin
-   # OR
-   npm run dev:plugin          # Without watch mode (manual rebuilds needed)
-   ```
+```bash
+cd camunda-modeler
+npm run dev:plugin:watch
+```
 
-3. **After Plugin Changes:**
-   - If using `dev:plugin:watch`: Changes to `bpenv-modeler` and the plugin rebuild automatically
-   - If using `dev:plugin`: The plugin needs to be rebuilt manually with `npm run eabpm-plugin:build`
-   - Changes to `bpenv-modeler` require rebuilding it: `cd ../bpenv-modeler && npm run build`
+This command watches `bpenv-modeler` and the BEE plugin, so changes are rebuilt automatically.
+
+Use `npm run dev:plugin` only if you want to start the modeler without watch mode. In that case:
+
+- Changes to the plugin require `npm run eabpm-plugin:build`
+- Changes to `bpenv-modeler` require `cd ../bpenv-modeler && npm run build`
 
 ## 🧪 Testing
 
