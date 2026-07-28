@@ -1,0 +1,74 @@
+{
+  "outposts": [
+    {
+      "place": "Aula LA1",
+      "topics": ["Programmazione Base"],
+      "difficulty": 1,
+      "requiredPlayers": 1,
+      "owner": "neutral"
+    },
+    {
+      "place": "Aula LA2",
+      "topics": ["Basi di Dati"],
+      "difficulty": 3,
+      "requiredPlayers": 1,
+      "owner": "neutral"
+    },
+    {
+      "place": "Team Lab",
+      "topics": ["PC Hardware"],
+      "difficulty": 2,
+      "requiredPlayers": 1,
+      "owner": "neutral"
+    },
+    {
+      "place": "Aula AB1",
+      "topics": ["Sistemi Operativi"],
+      "difficulty": 4,
+      "requiredPlayers": 3,
+      "owner": "team1"
+    },
+    {
+      "place": "Aula AB2",
+      "topics": ["Pagine Web e HTML"],
+      "difficulty": 1,
+      "requiredPlayers": 1,
+      "owner": "neutral"
+    },
+    {
+      "place": "Aula AB3",
+      "topics": ["Fondamenti di Informatica"],
+      "difficulty": 2,
+      "requiredPlayers": 2,
+      "owner": "neutral"
+    },
+    {
+      "place": "Aula Professori1",
+      "topics": ["Internet, Reti e Sicurezza"],
+      "difficulty": 5,
+      "requiredPlayers": 4,
+      "owner": "team2"
+    },
+    {
+      "place": "Aula Professori2",
+      "topics": ["Ingegneria del Software", "Software Project Management"],
+      "difficulty": 3,
+      "requiredPlayers": 2,
+      "owner": "neutral"
+    },
+    {
+      "place": "Aula Professori3",
+      "topics": ["Software Project Management"],
+      "difficulty": 4,
+      "requiredPlayers": 3,
+      "owner": "neutral"
+    },
+    {
+      "place": "Aula AA1",
+      "topics": ["BPMN (Business Process Model and Notation)", "Ingegneria del Software"],
+      "difficulty": 5,
+      "requiredPlayers": 4,
+      "owner": "neutral"
+    }
+  ]
+}

@@ -1,0 +1,654 @@
+{
+  "topics": [
+    {
+      "name": "Programmazione Base",
+      "questions": [
+        {
+          "difficulty": 1,
+          "text": "Quale tra i seguenti costrutti viene utilizzato per eseguire ripetutamente un blocco di codice fintanto che una condizione rimane vera?",
+          "options": [
+            "Il costrutto if-else",
+            "Il ciclo while",
+            "L'istruzione switch",
+            "L'istruzione return"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "Il ciclo while valuta una condizione booleana e continua a iterare il blocco di codice associato finché questa non diventa falsa."
+        },
+        {
+          "difficulty": 2,
+          "text": "In programmazione orientata agli oggetti (OOP), cos'è l'incapsulamento?",
+          "options": [
+            "La capacità di un oggetto di assumere più forme in base al contesto di esecuzione",
+            "Il meccanismo con cui una classe derivata eredita attributi e metodi da una classe base",
+            "La tecnica di nascondere lo stato interno di un oggetto, consentendo l'accesso solo tramite metodi pubblici",
+            "La compilazione di più file di codice sorgente in un unico file eseguibile binario"
+          ],
+          "correctOptionIndex": 2,
+          "explanation": "L'incapsulamento protegge i dati di un oggetto da modifiche arbitrarie esterne, esponendo un'interfaccia controllata tramite getter e setter o metodi pubblici."
+        },
+        {
+          "difficulty": 3,
+          "text": "In che cosa consiste principalmente il paradigma della Programmazione Funzionale?",
+          "options": [
+            "Nel suddividere il programma in blocchi logici chiamati 'classi' e 'oggetti' che contengono sia dati che codice",
+            "Nel basare l'esecuzione su una sequenza rigida di istruzioni che modificano lo stato globale della memoria",
+            "Nel vincolare la scrittura del codice all'uso esclusivo di tabelle di database relazionali",
+            "Nel concepire l'elaborazione software come la valutazione di funzioni matematiche pure, evitando stati mutabili ed effetti collaterali"
+          ],
+          "correctOptionIndex": 3,
+          "explanation": "La programmazione funzionale si basa sull'immutabilità dei dati e su funzioni matematiche pure che producono lo stesso output a parità di input, senza alterare uno stato globale."
+        },
+        {
+          "difficulty": 4,
+          "text": "Nel contesto della programmazione orientata agli oggetti (OOP), cos'è un 'Costruttore' e a cosa serve?",
+          "options": [
+            "Un metodo speciale di una classe che viene invocato automaticamente al momento della creazione di un oggetto per inizializzarne lo stato",
+            "Un compilatore esterno che trasforma il codice sorgente in bytecode pronto per il deploy",
+            "Un metodo che viene chiamato per distruggere l'oggetto e liberare manualmente la memoria RAM",
+            "Una funzione statica che impedisce a chiunque di ereditare le proprietà di una classe base"
+          ],
+          "correctOptionIndex": 0,
+          "explanation": "Il costruttore alloca la memoria necessaria e imposta i valori iniziali delle proprietà dell'istanza appena creata tramite l'operatore 'new'."
+        },
+        {
+          "difficulty": 5,
+          "text": "Che cosa si intende esattamente per 'Firma di un metodo' (Method Signature) all'interno di un linguaggio di programmazione?",
+          "options": [
+            "Il certificato crittografico digitale con cui lo sviluppatore firma il codice prima di pubblicarlo",
+            "La combinazione univoca del nome del metodo e della lista dei tipi dei suoi parametri formali in ordine",
+            "L'insieme di tutte le righe di codice che compongono il corpo interno del metodo stesso",
+            "Il tipo di dato restituito dal metodo accoppiato al nome della classe in cui è dichiarato"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "La firma permette al compilatore o all'interprete di identificare precisamente un metodo, discriminandolo in caso di overloading. Nella maggior parte dei linguaggi, il tipo di ritorno non fa parte della firma."
+        }
+      ]
+    },
+    {
+      "name": "Basi di Dati",
+      "questions": [
+        {
+          "difficulty": 1,
+          "text": "In un database relazionale, a cosa serve principalmente una 'Chiave Primaria' (Primary Key)?",
+          "options": [
+            "A crittografare i dati sensibili per impedire accessi non autorizzati",
+            "A identificare in modo univoco ogni singola riga (o record) all'interno di una tabella",
+            "A stabilire una connessione di rete sicura tra il server database e l'applicazione client",
+            "A memorizzare i file multimediali associati agli utenti all'interno del database"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "La chiave primaria garantisce che non vi siano duplicati identici nella tabella e permette di referenziare in modo univoco ogni entità (es. ID utente)."
+        },
+        {
+          "difficulty": 2,
+          "text": "Quale comando SQL viene utilizzato per unire i record di due o più tabelle sulla base di una colonna comune?",
+          "options": [
+            "MERGE",
+            "GROUP BY",
+            "UNION",
+            "JOIN"
+          ],
+          "correctOptionIndex": 3,
+          "explanation": "La clausola JOIN permette di combinare righe provenienti da più tabelle stabilendo una condizione di uguaglianza o corrispondenza tra chiavi primarie ed esterne."
+        },
+        {
+          "difficulty": 3,
+          "text": "All'interno di un Database Relazionale (RDBMS), in quale modo vengono organizzati e strutturati i dati a livello logico?",
+          "options": [
+            "In un unico file di testo lineare e sequenziale privo di collegamenti esterni",
+            "In tabelle composte da righe e colonne predefinite, collegate tra loro tramite vincoli di integrità",
+            "Esclusivamente sotto forma di alberi gerarchici binari non modificabili",
+            "Come un insieme disordinato di coppie chiave-valore prive di tipi di dato descrittivi"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "I database relazionali sfruttano l'algebra relazionale organizzando i dati in relazioni strutturate in righe (tuple) e colonne (attributi)."
+        },
+        {
+          "difficulty": 4,
+          "text": "Quale tra le seguenti caratteristiche definisce al meglio la natura e il funzionamento di un Database Non Relazionale (NoSQL)?",
+          "options": [
+            "L'obbligo assoluto di rispettare la Terza Forma Normale (3NF) su ogni collezione di record",
+            "L'uso esclusivo del linguaggio SQL standard per svolgere qualsiasi operazione di lettura e scrittura",
+            "La capacità di gestire dati non strutturati o semistrutturati offrendo schemi flessibili (schema-less) e scalabilità orizzontale nativa",
+            "La mancanza totale di supporto per memorizzare informazioni numeriche intere o decimali"
+          ],
+          "correctOptionIndex": 2,
+          "explanation": "I DB NoSQL (documentali, grafi, key-value) non impongono schemi tabellari rigidi a priori, facilitando la gestione di big data e la distribuzione su cluster (scalabilità orizzontale)."
+        },
+        {
+          "difficulty": 5,
+          "text": "Qual è una differenza architetturale critica nel bilanciamento delle proprietà di sistema tra un Database Relazionale (SQL) e uno Non Relazionale (NoSQL) distribuito?",
+          "options": [
+            "I DB relazionali privilegiano la consistenza immediata seguendo il modello ACID; i NoSQL distribuiti sacrificano spesso la consistenza a favore di disponibilità e tolleranza al partizionamento (modello BASE / Teorema CAP)",
+            "I database relazionali funzionano solo sulla memoria volatile RAM, mentre i NoSQL scrivono unicamente su nastri magnetici",
+            "I DB SQL scalano unicamente in modo orizzontale, mentre i NoSQL possono scalare solo verticalmente",
+            "I database relazionali escludono l'uso delle chiavi esterne, che sono invece obbligatorie nei database NoSQL documentali"
+          ],
+          "correctOptionIndex": 0,
+          "explanation": "Il teorema CAP impone che un sistema distribuito non possa garantire contemporaneamente Consistenza, Disponibilità e Tolleranza al partizionamento. I DB SQL scelgono la consistenza forte (ACID), i NoSQL distribuiti spesso optano per la consistenza eventuale (BASE)."
+        }
+      ]
+    },
+    {
+      "name": "PC Hardware",
+      "questions": [
+        {
+          "difficulty": 1,
+          "text": "Quale componente hardware del computer è considerato il 'cervello' del sistema, incaricato di eseguire le istruzioni dei programmi?",
+          "options": [
+            "RAM (Random Access Memory)",
+            "SSD (Solid State Drive)",
+            "CPU (Central Processing Unit)",
+            "GPU (Graphics Processing Unit)"
+          ],
+          "correctOptionIndex": 2,
+          "explanation": "La CPU (processore) è l'unità centrale che esegue i calcoli aritmetici e logici ed elabora le istruzioni del software di sistema e applicativo."
+        },
+        {
+          "difficulty": 2,
+          "text": "Qual è la caratteristica distintiva della memoria RAM rispetto a un disco rigido o SSD?",
+          "options": [
+            "Ha una capacità di archiviazione nettamente superiore a parità di costo",
+            "È volatile, ovvero perde tutte le informazioni memorizzate quando si spegne il computer",
+            "I suoi dati non possono essere modificati ma solo letti dal processore",
+            "Si collega direttamente all'esterno del case tramite una porta USB standard"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "La RAM è una memoria di lavoro ad accesso rapido ma volatile: necessita di alimentazione elettrica continua per conservare i dati; allo spegnimento si svuota completamente."
+        },
+        {
+          "difficulty": 3,
+          "text": "Quale tecnologia viene utilizzata nei moderni SSD NVMe per garantire velocità di trasferimento dati nettamente superiori rispetto ai vecchi SSD SATA?",
+          "options": [
+            "La presenza di piatti magnetici che ruotano a oltre 15.000 giri al minuto",
+            "L'implementazione di un sistema di raffreddamento a liquido integrato nel chip di memoria",
+            "L'adozione esclusiva di celle di memoria di tipo ROM non riscrivibili",
+            "L'utilizzo del bus PCI Express (PCIe) per la comunicazione diretta con la CPU"
+          ],
+          "correctOptionIndex": 3,
+          "explanation": "Gli SSD NVMe sfruttano l'interfaccia e le corsie ad alta velocità del bus PCIe, eliminando i colli di bottiglia e i limiti di banda del vecchio protocollo SATA."
+        },
+        {
+          "difficulty": 4,
+          "text": "Nel contesto delle memorie cache della CPU (L1, L2, L3), quale delle seguenti affermative descrive accuratamente la loro struttura e il loro comportamento?",
+          "options": [
+            "La cache L3 è implementata fuori dal chip della CPU, direttamente sui moduli esterni della memoria RAM",
+            "La cache L1 memorizza interi file di sistema pronti per essere eseguiti all'avvio del PC",
+            "La cache L1 è la più veloce e la più vicina ai nuclei di calcolo, ma ha la capacità più ridotta rispetto a L2 e L3",
+            "In caso di 'Cache Miss', il dato richiesto viene trovato immediatamente nella memoria cache di livello più basso"
+          ],
+          "correctOptionIndex": 2,
+          "explanation": "Esiste un compromesso (trade-off) tra velocità e capacità. La cache L1 è integrata strettamente nel core ed è velocissima ma microscopica; la L3 è più capiente ma leggermente più lenta."
+        },
+        {
+          "difficulty": 5,
+          "text": "Come lavora internamente il processore (CPU) durante la sua operatività ciclica fondamentale per elaborare un'istruzione?",
+          "options": [
+            "Invia stringhe di testo direttamente al monitor attendendo che la GPU restituisca i dati convertiti in bit",
+            "Esegue ciclicamente i tre stadi sequenziali di Fetch (prelievo istruzione da memoria), Decode (interpretazione dell'opcode) ed Execute (esecuzione tramite ALU o altri moduli)",
+            "Effettua una riscrittura completa del firmware del BIOS a ogni ciclo di clock per aggiornare i driver",
+            "Legge i dati in modo puramente casuale dall'hard disk saltando la RAM per azzerare i tempi di attesa"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "Questo è il ciclo macchina fondamentale (ciclo di Von Neumann): Fetch (prelievo dall'indirizzo indicato dal Program Counter), Decode (tramite l'unità di controllo) ed Execute (tramite l'ALU)."
+        }
+      ]
+    },
+    {
+      "name": "Sistemi Operativi",
+      "questions": [
+        {
+          "difficulty": 1,
+          "text": "Qual è il compito principale del 'Kernel' in un sistema operativo?",
+          "options": [
+            "Fornire l'interfaccia grafica (GUI) con le icone e le finestre per l'utente",
+            "Gestire le risorse hardware del computer e fare da intermediario con i programmi software",
+            "Controllare la validità della licenza d'uso del software commerciale installato",
+            "Eseguire la scansione dei dischi fissi alla ricerca esclusiva di virus e trojan"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "Il kernel è il nucleo del sistema operativo. Gestisce il tempo di CPU, la memoria, i file system e le periferiche, isolando l'hardware dai programmi utente."
+        },
+        {
+          "difficulty": 2,
+          "text": "Nel contesto della gestione dei processi, qual è la differenza fondamentale tra un 'Processo' e un 'Thread'?",
+          "options": [
+            "I processi vengono salvati sul disco, mentre i thread risiedono esclusivamente all'interno della cache L1 della CPU",
+            "Un processo ha un proprio spazio di memoria isolato, mentre i thread dello stesso processo condividono lo stesso spazio di memoria",
+            "Un processo può essere eseguito solo su CPU a singolo core, mentre i thread richiedono processori multi-core",
+            "I processi sono generati dall'utente, mentre i thread possono essere creati solo dal firmware del BIOS"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "Un processo è un programma in esecuzione con risorse e memoria protette e dedicate. Un thread è un sotto-flusso di esecuzione leggero: più thread dello stesso processo condividono lo stesso spazio di indirizzamento."
+        },
+        {
+          "difficulty": 3,
+          "text": "Che cosa si intende per 'Thrashing' (Paging frenetico) all'interno di un sistema di gestione della memoria virtuale?",
+          "options": [
+            "Il processo di deframmentazione automatica dei settori danneggiati di un disco a stato solido",
+            "Una tecnica di attacco hacker volta a saturare i registri interni del processore tramite cicli infiniti",
+            "Una condizione in cui il sistema operativo spende più tempo a scambiare pagine tra RAM e disco che a eseguire il codice dei programmi",
+            "La cancellazione sicura dei file temporanei del sistema operativo al termine di ogni sessione lavorativa"
+          ],
+          "correctOptionIndex": 2,
+          "explanation": "Il thrashing avviene quando la RAM fisica è quasi esaurita. Il sistema operativo genera continui 'page fault' e passa tutto il tempo a muovere pagine da e verso l'area di swap su disco, portando le prestazioni vicino allo zero."
+        },
+        {
+          "difficulty": 4,
+          "text": "Quale algoritmo di scheduling della CPU può causare 'Starvation' (Inedia) assoluta dei processi a priorità più bassa se il sistema riceve un flusso continuo di attività?",
+          "options": [
+            "Round Robin (RR)",
+            "First-Come, First-Served (FCFS)",
+            "Shortest Job First Bilanciato con Invecchiamento (Aging)",
+            "Priority Scheduling (Senza Prelazione / Non-preemptive)"
+          ],
+          "correctOptionIndex": 3,
+          "explanation": "Nello scheduling a priorità statico, se arrivano continuamente processi ad alta priorità, quelli a bassa priorità rimarranno indefinitamente in coda senza mai ottenere la CPU (starvation)."
+        },
+        {
+          "difficulty": 5,
+          "text": "Nel contesto della sincronizzazione tra processi concorrenti, come agiscono le primitive fondamentali P (wait) e V (signal) su un Semaforo a conteggio?",
+          "options": [
+            "La primitiva P decrementa il valore del semaforo e, se diventa negativo, blocca il processo; la primitiva V incrementa il valore e risveglia un processo bloccato",
+            "La primitiva P resetta il semaforo a zero cancellando la memoria, la primitiva V termina tutti i thread attivi",
+            "La primitiva P assegna la CPU al processo a massima priorità, la primitiva V calcola la frazione di secondo rimanente",
+            "La primitiva P duplica i dati della sezione critica in modo asincrono, la primitiva V esegue una query SQL di controllo"
+          ],
+          "correctOptionIndex": 0,
+          "explanation": "Introdotte da Dijkstra, servono a regolare l'accesso a risorse condivise. P (Proberen) decrementa il contatore e sospende il chiamante se non c'è disponibilità. V (Verhogen) rilascia la risorsa e segnala l'evento ai processi in attesa."
+        }
+      ]
+    },
+    {
+      "name": "Pagine Web e HTML",
+      "questions": [
+        {
+          "difficulty": 1,
+          "text": "Quale tag HTML viene utilizzato per inserire un collegamento ipertestuale (link) verso un'altra pagina web?",
+          "options": [
+            "Il tag <link>",
+            "Il tag <a>",
+            "Il tag <href>",
+            "Il tag <p>"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "Il tag <a> (anchor), accoppiato all'attributo href, definisce un collegamento ipertestuale cliccabile in una pagina web."
+        },
+        {
+          "difficulty": 2,
+          "text": "Qual è la funzione principale del file chiamato 'Sitemap.xml' all'interno di un sito web?",
+          "options": [
+            "Impostare lo stile grafico e il layout responsive di tutte le pagine web",
+            "Memorizzare le password criptate degli utenti che effettuano il login",
+            "Fornire ai motori di ricerca un elenco strutturato di tutte le URL del sito per facilitarne la scansione e l'indicizzazione",
+            "Accelerare il caricamento delle immagini comprimendole al volo"
+          ],
+          "correctOptionIndex": 2,
+          "explanation": "La sitemap è un file XML che elenca le pagine di un sito web per comunicare ai crawler dei motori di ricerca (es. Googlebot) l'organizzazione e la gerarchia dei contenuti."
+        },
+        {
+          "difficulty": 3,
+          "text": "Che cosa si intende per 'Tag Semantici' introdotti in HTML5 (come <article>, <section>, <nav>) e qual è il loro scopo?",
+          "options": [
+            "Tag speciali usati per iniettare script esecutivi crittografati direttamente nel DOM della pagina",
+            "Tag che comunicano chiaramente il significato e il ruolo del contenuto sia al browser che ai motori di ricerca, migliorando l'accessibilità e la SEO",
+            "Elementi invisibili utili unicamente a bloccare gli attacchi informatici di tipo Cross-Site Scripting (XSS)",
+            "Comandi HTML compilati che sostituiscono interamente l'uso di CSS esterni"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "A differenza dei tag generici come <div>, i tag semantici esplicitano la natura del contenuto racchiuso (es. <nav> per i menu), agevolando gli screen reader per l'accessibilità e l'ottimizzazione SEO."
+        },
+        {
+          "difficulty": 4,
+          "text": "Qual è la differenza strutturale e di comportamento tra elementi HTML classificati come 'Block-level' (es. <div>, <p>) ed elementi 'Inline' (es. <span>, <strong>)?",
+          "options": [
+            "Gli elementi block-level possono essere inseriti solo nell'<head>, mentre quelli inline albergano esclusivamente nel <body>",
+            "Gli elementi inline richiedono l'uso di JavaScript per essere renderizzati, i block-level no",
+            "Gli elementi di blocco iniziano sempre su una nuova riga e occupano tutta la larghezza disponibile; gli elementi inline occupano solo lo spazio necessario e non forzano l'andata a capo",
+            "I tag di blocco impediscono il download del codice HTML da parte dell'utente, i tag inline lo consentono"
+          ],
+          "correctOptionIndex": 2,
+          "explanation": "Gli elementi 'block' si estendono per tutta la larghezza del contenitore padre forzando un a capo. Gli elementi 'inline' scorrono all'interno del testo senza interrompere il flusso lineare del paragrafo."
+        },
+        {
+          "difficulty": 5,
+          "text": "All'interno del ciclo di rendering di una pagina web da parte del browser, in cosa consiste esattamente il fenomeno del 'Reflow' (o Layout) e da cosa può essere innescato?",
+          "options": [
+            "È il processo con cui il browser ricalcola le posizioni e le geometrie degli elementi nel DOM a seguito di modifiche strutturali, come la manipolazione delle dimensioni via JavaScript o l'inserimento di nuovi nodi",
+            "È il riavvio del server web remoto quando il numero di richieste HTTP simultanee eccede la banda massima",
+            "La cyber-conversione automatica del codice HTML5 in codice sorgente C++ effettuata dal motore V8",
+            "Il caricamento in cache delle immagini in formato WebP per escludere l'intervento del foglio di stile"
+          ],
+          "correctOptionIndex": 0,
+          "explanation": "Il Reflow è l'operazione con cui il browser calcola la posizione e la dimensione esatta di ogni nodo del DOM nello spazio visivo. Azioni JavaScript che alterano geometrie (es. width, height, fontSize) scatenano reflow continui compromettendo le performance del front-end."
+        }
+      ]
+    },
+    {
+      "name": "Fondamenti di Informatica",
+      "questions": [
+        {
+          "difficulty": 1,
+          "text": "Nel sistema di numerazione binario, a quale valore espresso in base decimale corrisponde la stringa di bit '1011'?",
+          "options": [
+            "13",
+            "9",
+            "7",
+            "11"
+          ],
+          "correctOptionIndex": 3,
+          "explanation": "Si applica la notazione posizionale: 1x2^3 + 0x2^2 + 1x2^1 + 1x2^0 = 8 + 0 + 2 + 1 = 11."
+        },
+        {
+          "difficulty": 2,
+          "text": "Quale delle seguenti strutture dati segue una logica di accesso di tipo LIFO (Last In, First Out)?",
+          "options": [
+            "La Coda (Queue)",
+            "La Pila (Stack)",
+            "La Lista Concatenata Semplice (Linked List)",
+            "La Tabella Hash (Hash Map)"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "Nello Stack (pila), l'ultimo elemento inserito tramite operazione di push è obbligatoriamente il primo a essere rimosso tramite operazione di pop."
+        },
+        {
+          "difficulty": 3,
+          "text": "Che cosa stabilisce formalmente il Teorema di Rice nell'ambito della teoria della computabilità?",
+          "options": [
+            "Ogni algoritmo efficiente può essere eseguito in un tempo massimo che cresce in modo strettamente lineare",
+            "I computer quantistici possono risolvere qualsiasi problema matematico in tempo costante",
+            "Qualsiasi proprietà semantica non banale di un insieme di funzioni calcolabili è indecidibile",
+            "Un database relazionale non può contenere tabelle prive di una chiave primaria strutturata"
+          ],
+          "correctOptionIndex": 2,
+          "explanation": "Il teorema estende il problema della terminazione di Turing, affermando che è matematicamente impossibile costruire un algoritmo in grado di determinare una qualsiasi proprietà comportamentale semantica non banale di un altro programma generico partendo solo dal suo codice sorgente."
+        },
+        {
+          "difficulty": 4,
+          "text": "Qual è la differenza storica e teorica fondamentale tra un Automa a Stati Finiti (FSM) e una Macchina di Turing?",
+          "options": [
+            "L'Automa a Stati Finiti può risolvere problemi non computabili, mentre la Macchina di Turing è strettamente deterministica",
+            "La Macchina di Turing dispone di un nastro di memoria potenzialmente infinito che può essere letto e scritto bidirezionalmente, espandendo la classe dei linguaggi riconoscibili rispetto a un'FSM",
+            "La Macchina di Turing lavora esclusivamente in parallelo, mentre l'FSM elabora i bit solo sequenzialmente",
+            "Gli Automi a Stati Finiti richiedono l'uso dell'architettura quantistica, mentre la Macchina di Turing descrive il silicio classico"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "Un'FSM ha una memoria limitata e fissa, utile a riconoscere solo i linguaggi regolari. La Macchina di Turing introduce un nastro infinito riscrivibile come memoria ausiliaria, definendo il limite superiore di ciò che è computabile."
+        },
+        {
+          "difficulty": 5,
+          "text": "Quale delle seguenti affermazioni descrive accuratamente il celebre 'Problema della Terminazione' (Halting Problem) dimostrato da Alan Turing?",
+          "options": [
+            "Un difetto strutturale dei sistemi Unix che causa il crash dell'orologio interno allo scoccare dell'anno 2038",
+            "È l'impossibilità logica di costruire un algoritmo generale in grado di stabilire, per ogni possibile programma e input forniti, se quel programma terminerà la sua esecuzione o continuerà all'infinito",
+            "Un teorema che attesta l'obbligo di inserire un'istruzione 'break' all'interno di ogni iterazione per prevenire il surriscaldamento fisico del chip",
+            "La dimostrazione che la classe dei problemi polinomiali P coincide matematicamente con la classe dei problemi NP"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "Alan Turing dimostrò nel 1936, tramite una prova per contraddizione (diagonalizzazione), che il problema della terminazione è indecidibile: non può esistere un algoritmo universale capace di decretare con certezza se un programma arbitrario si fermerà o entrerà in un loop infinito."
+        }
+      ]
+    },
+    {
+      "name": "Internet, Reti e Sicurezza",
+      "questions": [
+        {
+          "difficulty": 1,
+          "text": "Quale protocollo di rete crittografa la comunicazione web tra il browser dell'utente e il sito internet, garantendo la riservatezza dei dati immessi?",
+          "options": [
+            "HTTP",
+            "FTP",
+            "HTTPS",
+            "DNS"
+          ],
+          "correctOptionIndex": 2,
+          "explanation": "Il protocollo HTTPS (HyperText Transfer Protocol Secure) applica sopra lo strato HTTP standard una cifratura asimmetrica/simmetrica mediante i protocolli TLS/SSL."
+        },
+        {
+          "difficulty": 2,
+          "text": "A quale livello del modello concettuale ISO/OSI opera il protocollo IP (Internet Protocol)?",
+          "options": [
+            "Livello 4 - Trasporto (Transport Layer)",
+            "Livello 2 - Collegamento Dati (Data Link Layer)",
+            "Livello 7 - Applicazione (Application Layer)",
+            "Livello 3 - Rete (Network Layer)"
+          ],
+          "correctOptionIndex": 3,
+          "explanation": "Il livello 3 (Rete) gestisce la logica di instradamento (routing) dei pacchetti di dati attraverso nodi intermedi, la frammentazione e l'indirizzamento logico tramite gli indirizzi IP."
+        },
+        {
+          "difficulty": 3,
+          "text": "Nel contesto degli attacchi informatici, in cosa consiste una minaccia di tipo 'Man-in-the-Middle' (MitM)?",
+          "options": [
+            "Un'infezione malware che crittografa il disco dell'utente richiedendo un riscatto in criptovalute",
+            "Una tecnica di ingegneria sociale inviata via e-mail che spinge la vittima a inserire le proprie credenziali su un sito falso",
+            "Un utente malintenzionato si interpone segretamente tra due parti che comunicano, intercettando o alterando i messaggi scambiati",
+            "Il tentativo di indovinare una password provando sistematicamente tutte le combinazioni possibili di caratteri"
+          ],
+          "correctOptionIndex": 2,
+          "explanation": "Negli attacchi MitM, il cyber-criminale riesce a deviare i flussi di rete interponendosi tra client e server, potendo intercettare dati confidenziali o manipolare il contenuto dei messaggi scambiati a insaputa delle vittime."
+        },
+        {
+          "difficulty": 4,
+          "text": "Nel contesto dell'indirizzamento di rete, a cosa serve nello specifico un Indirizzo IP (sia esso IPv4 o IPv6)?",
+          "options": [
+            "A stabilire il nome testuale mnemonico del sito internet per non dover digitare codici binari nel browser",
+            "A identificare univocamente un'interfaccia di rete di un dispositivo (host) all'interno di una rete commutata a pacchetto, consentendo l'instradamento dei dati",
+            "A misurare la velocità fisica di trasmissione in megabit al secondo dei cavi in fibra ottica",
+            "A calcolare il consumo energetico della scheda di rete wireless durante l'upload dei dati"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "L'indirizzo IP funge da identificativo univoco logico a livello globale per una singola interfaccia di rete, consentendo ai router dello strato 3 OSI di indirizzare i pacchetti verso la corretta destinazione finale."
+        },
+        {
+          "difficulty": 5,
+          "text": "Come si suddivide strutturalmente e logicamente un indirizzo IPv4 accoppiato alla sua rispettiva maschera di sottorete (Subnet Mask)?",
+          "options": [
+            "In tre segmenti uguali: uno per la chiave pubblica, uno per l'algoritmo AES e uno per l'MAC Address",
+            "In una parte dedicata unicamente al prefisso del browser ed una riservata all'estensione del dominio (.com, .it)",
+            "Metà bit sono riservati alla priorità della CPU e l'altra metà allo spazio disponibile su disco",
+            "In una prima porzione di bit che identifica la Rete (Network ID) e una seconda porzione rimanente che identifica lo specifico Host (Host ID)"
+          ],
+          "correctOptionIndex": 3,
+          "explanation": "Un indirizzo IPv4 è composto da 32 bit. La Subnet Mask indica la linea di demarcazione: i bit corrispondenti agli 1 definiscono la sottorete logica (Network ID), mentre i restanti bit associati agli 0 identificano il singolo nodo all'interno di quella rete (Host ID)."
+        }
+      ]
+    },
+    {
+      "name": "Ingegneria del Software",
+      "questions": [
+        {
+          "difficulty": 1,
+          "text": "Nel contesto del ciclo di vita del software, quale delle seguenti descrizioni si adatta meglio al tradizionale modello 'a Cascata' (Waterfall)?",
+          "options": [
+            "Un metodo flessibile che prevede il rilascio continuo di codice non testato direttamente in produzione ogni giorno",
+            "Un approccio sequenziale in cui ogni fase (requisiti, progettazione, sviluppo, test) inizia solo quando la precedente è interamente terminata",
+            "Un'architettura basata sulla duplicazione automatica dei server in cloud in base al traffico degli utenti",
+            "La scrittura preventiva dei test unitari prima ancora di aver codificato le funzioni applicative vere e proprie"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "Il modello Waterfall è un ciclo di vita lineare e predittivo. Ogni macro-fase è bloccante ed è rappresentata come uno step sequenziale rigido; i ritorni alle fasi antecedenti risultano molto onerosi."
+        },
+        {
+          "difficulty": 2,
+          "text": "A cosa servono primariamente i diagrammi delle classi nel linguaggio di modellazione UML?",
+          "options": [
+            "A illustrare la sequenza temporale esatta dei messaggi scambiati tra gli oggetti durante uno scenario d'uso",
+            "A mostrare i requisiti funzionali del sistema dal punto di vista degli attori esterni",
+            "A rappresentare la struttura statica del sistema, mostrando le classi con i loro attributi, metodi e le relazioni reciproche",
+            "A descrivere il posizionamento fisico dei componenti software sui server e nodi hardware di rete"
+          ],
+          "correctOptionIndex": 2,
+          "explanation": "Il diagramma delle classi è un costrutto strutturale statico di UML. Definisce il 'blueprint' logico del codice orientato agli oggetti, evidenziando le proprietà, le operazioni delle classi e i legami di associazione, ereditarietà o composizione."
+        },
+        {
+          "difficulty": 3,
+          "text": "Nel contesto dei Design Pattern creazionali GoF (Gang of Four), qual è lo scopo specifico del pattern 'Singleton'?",
+          "options": [
+            "Consentire a un oggetto di notificare automaticamente tutti gli osservatori registrati in caso di mutamento del proprio stato",
+            "Garantire che una classe abbia una sola istanza globale e fornire un punto di accesso unico a essa",
+            "Definire un'interfaccia per la creazione di un oggetto, lasciando alle sottoclassi la scelta di quale classe specifica istanziare",
+            "Convertire l'interfaccia di una classe esistente in un'altra interfaccia attesa dai client per risolverne l'incompatibilità"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "Il pattern Singleton privatizza il costruttore della classe e mette a disposizione un metodo statico pubblico (es. getInstance()) che istanzia l'oggetto una sola volta alla prima chiamata, restituendo sempre lo stesso riferimento di memoria."
+        },
+        {
+          "difficulty": 4,
+          "text": "Cosa asserisce il principio 'Liskov Substitution Principle' (la lettera L dei principi SOLID) nell'ambito della progettazione a oggetti avanzata?",
+          "options": [
+            "Una classe deve avere un'unica, ben definita ragione per cambiare, concentrandosi su una sola responsabilità",
+            "Le entità software devono essere aperte all'estensione ma rigidamente chiuse alle modifiche strutturali dirette",
+            "I moduli di alto livello non devono dipendere da moduli di basso livello, ma entrambi devono dipendere da astrazioni",
+            "Gli oggetti di una classe derivata devono poter sostituire gli oggetti della classe base senza alterare la correttezza del programma"
+          ],
+          "correctOptionIndex": 3,
+          "explanation": "Formulato da Barbara Liskov, il principio sancisce che una sottoclasse non deve mai violare i vincoli comportamentali stabiliti dalla sua superclasse; il codice client deve poter utilizzare una classe derivata al posto di una classe base in modo trasparente."
+        },
+        {
+          "difficulty": 5,
+          "text": "Nella modellazione dei requisiti tramite diagrammi dei Casi d'Uso UML, qual è la sottile differenza concettuale tra le relazioni di estensione (<<extend>>) e di inclusione (<<include>>)?",
+          "options": [
+            "L'inclusione indica un passo obbligatorio ed essenziale per il completamento del caso d'uso base; l'estensione rappresenta un comportamento opzionale che si attiva solo se si verificano specifiche condizioni",
+            "L'inclusione unisce due attori umani tra loro, mentre l'estensione collega un attore a un server hardware esterno",
+            "La relazione di estensione viene usata solo in Java, l'inclusione è propria del C++",
+            "L'estensione cancella il caso d'uso base in caso di errore, l'inclusione lo duplica nel cloud"
+          ],
+          "correctOptionIndex": 0,
+          "explanation": "<<include>> definisce una dipendenza forte e incondizionata (es. 'Effettua pagamento' include sempre 'Verifica disponibilità fondi'). <<extend>> è condizionale: il caso d'uso esteso descrive un flusso alternativo o facoltativo (es. 'Applica codice coupon sconto')."
+        }
+      ]
+    },
+    {
+      "name": "Software Project Management",
+      "questions": [
+        {
+          "difficulty": 1,
+          "text": "Nel framework Agile Scrum, chi è la figura responsabile di definire le priorità degli elementi del Product Backlog massimizzando il valore del prodotto?",
+          "options": [
+            "Lo Scrum Master",
+            "Il Lead Developer del Team di Sviluppo",
+            "Il Product Owner",
+            "Lo Sponsor Finanziario Esterno"
+          ],
+          "correctOptionIndex": 2,
+          "explanation": "Il Product Owner (PO) è l'unico proprietario e responsabile del Product Backlog: raccoglie i requisiti di business dagli stakeholder e ordina i compiti in base al valore generato per gli utenti finali."
+        },
+        {
+          "difficulty": 2,
+          "text": "Che cosa rappresenta il 'Percorso Critico' (Critical Path) nella pianificazione di un progetto tramite diagramma di PERT/CPM?",
+          "options": [
+            "L'elenco dei compiti a più alto rischio di attacco informatico identificati dal team di cyber-security",
+            "La sequenza di attività collegate che determina la durata minima totale del progetto; qualsiasi ritardo in queste attività ritarda l'intero progetto",
+            "La fase di installazione fisica dei server nel data-center aziendale condotta dai sistemisti",
+            "L'insieme dei bug bloccanti scoperti durante l'ultimo giorno di test prima della consegna"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "Il percorso critico è la sequenza logica di compiti interdipendenti più lunga del progetto. Le attività su questo cammino possiedono uno scorrimento (slack/float) pari a zero: se una di queste ritarda, la data finale di consegna slitterà automaticamente."
+        },
+        {
+          "difficulty": 3,
+          "text": "Nel contesto delle metodologie Agili, che cos'è una 'User Story' e quale formula sintattica standard adotta comunemente?",
+          "options": [
+            "Il resoconto legale delle ore lavorative inserito dai programmatori senior nel registro presenze",
+            "Una sequenza di istruzioni SQL necessarie a ripristinare il database aziendale in caso di guasto",
+            "Il manuale utente completo rilegato in formato PDF distribuito insieme al software commerciale",
+            "Una descrizione semplice di un requisito software espressa dal punto di vista dell'utente finale: 'In quanto [Ruolo], voglio [Obiettivo], affinché [Beneficio]'"
+          ],
+          "correctOptionIndex": 3,
+          "explanation": "Le User Stories sono strumenti snelli usati nell'Agile per descrivere le funzionalità desiderate focalizzandosi sul valore e sui bisogni reali di un determinato attore, evitando specifiche tecniche premature."
+        },
+        {
+          "difficulty": 4,
+          "text": "Nella tecnica di stima PERT, in quale modo viene calcolata la durata attesa (Te) di una determinata attività partendo dai valori Ottimistico (o), Più Probabile (m) e Pessimistico (p)?",
+          "options": [
+            "Te = (o + m + p) / 3",
+            "Te = (o + 4m + p) / 6",
+            "Te = o x m x p",
+            "Te = p - o"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "La stima a tre punti di PERT adotta una media ponderata basata sulla distribuzione di probabilità Beta. Assegna un peso quattro volte superiore alla stima realistica (m) rispetto agli estremi ottimistico e pessimistico per mitigare i rischi di errore statistico."
+        },
+        {
+          "difficulty": 5,
+          "text": "Quale delle seguenti opzioni esprime una pratica fondamentale e un principio cardine della metodologia agile Extreme Programming (XP)?",
+          "options": [
+            "L'adozione sistematica di Pair Programming, sviluppo guidato dai test (TDD), rilasci frequenti (Small Releases) e integrazione continua del codice",
+            "Il divieto formale per gli sviluppatori di comunicare direttamente con il cliente finale prima del termine dell'anno fiscale",
+            "La stesura di un monumentale documento di progettazione dell'architettura prima di scrivere qualsiasi riga di codice",
+            "L'esternalizzazione di tutte le attività di verifica e testing a un team isolato geograficamente senza condivisione di codice sorgente"
+          ],
+          "correctOptionIndex": 0,
+          "explanation": "L'Extreme Programming (XP) porta all'estremo le buone pratiche ingegneristiche. I suoi pilastri includono il TDD (scrivere i test prima del codice applicativo), il Pair Programming, cicli di feedback rapidissimi e continuous integration."
+        }
+      ]
+    },
+    {
+      "name": "BPMN (Business Process Model and Notation)",
+      "questions": [
+        {
+          "difficulty": 1,
+          "text": "All'interno di un diagramma BPMN, che cosa rappresenta graficamente un elemento di forma rettangolare ad angoli arrotondati?",
+          "options": [
+            "Un Evento (come l'inizio o la fine del processo stesso)",
+            "Un Gateway (un punto di snodo decisionale o di ramificazione del flusso)",
+            "Un Data Object (un documento o file di input/output d'appoggio)",
+            "Un'Attività o Task (un'unità di lavoro elementare compiuta nel processo)"
+          ],
+          "correctOptionIndex": 3,
+          "explanation": "Nella notazione BPMN, i rettangoli con angoli smussati rappresentano le attività operative, ovvero le azioni concrete compiute da attori umani o sistemi automatici all'interno del flusso aziendale."
+        },
+        {
+          "difficulty": 2,
+          "text": "In BPMN, qual è la funzione visiva e logica dei contenitori denominati 'Pool' e 'Lane'?",
+          "options": [
+            "Servono a differenziare il codice sorgente scritto in linguaggio Java da quello scritto in C#",
+            "Il Pool rappresenta un'organizzazione o un partecipante autonomo del processo; le Lane suddividono internamente il Pool per mostrare i singoli ruoli o dipartimenti operativi",
+            "Il Pool contiene i server fisici stabili, le Lane ospitano i database volatili in cloud",
+            "Il Pool indica le attività ad alto costo economico, le Lane raggruppano i compiti gratuiti o automatizzati"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "I Pool governano i confini di un'entità aziendale o b2b indipendente. Le corsie interne (Lane) partizionano il Pool per assegnare la paternità e la responsabilità delle specifiche attività a determinati reparti o figure professionali."
+        },
+        {
+          "difficulty": 3,
+          "text": "Qual è il comportamento logico standard imposto da un Gateway di tipo 'Esclusivo' (XOR Gateway) contrassegnato da una croce o vuoto all'interno del rombo?",
+          "options": [
+            "Il flusso viene sdoppiato attivando in parallelo tutti i rami d'uscita contemporaneamente",
+            "Permette l'avanzamento del flusso solo se tutti i rami in ingresso hanno completato la loro esecuzione",
+            "Il flusso in ingresso viene indirizzato verso una e una sola delle rotte d'uscita disponibili in base alla valutazione delle condizioni",
+            "Blocca immediatamente il processo generando un'eccezione di sistema irreparabile"
+          ],
+          "correctOptionIndex": 2,
+          "explanation": "Il gateway XOR (Exclusive OR) introduce una deviazione disgiuntiva mutualmente esclusiva: le condizioni sui rami d'uscita vengono valutate in sequenza e il token del processo imbocca una e una sola strada, escludendo le vie alternative."
+        },
+        {
+          "difficulty": 4,
+          "text": "Qual è la differenza fondamentale, in termini di modellazione dei flussi di sequenza, tra la comunicazione che avviene all'interno dello stesso Pool rispetto a quella tra due Pool differenti?",
+          "options": [
+            "Tra Pool diversi la comunicazione avviene solo verbalmente senza poter tracciare alcuna linea nel diagramma",
+            "All'interno dello stesso Pool si usano i Sequence Flow (linee continue) per connettere gli elementi; tra Pool diversi è tassativo usare i Message Flow (linee tratteggiate con cerchietto all'origine)",
+            "All'interno dello stesso Pool la comunicazione è sempre istantanea a costo zero, tra Pool diversi richiede l'uso di smart contract blockchain",
+            "La comunicazione interna richiede l'uso esclusivo di frecce bidirezionali rosse spesse"
+          ],
+          "correctOptionIndex": 1,
+          "explanation": "Un flusso di sequenza (Sequence Flow, freccia a linea continua) non può mai oltrepassare i confini fisici di un Pool. Per modellare lo scambio di messaggi b2b tra entità indipendenti si utilizzano esclusivamente i flussi di messaggio (Message Flow, linee tratteggiate)."
+        },
+        {
+          "difficulty": 5,
+          "text": "Nel contesto degli eventi BPMN avanzati, qual è la differenza operativa tra un 'Non-Interrupting Boundary Event' e un classico 'Interrupting Boundary Event' agganciato al perimetro di un sotto-processo?",
+          "options": [
+            "L'evento Interrupting cancella immediatamente l'attività principale in corso deviando il flusso sul percorso dell'evento; l'evento Non-Interrupting avvia un ramo parallelo secondario lasciando l'attività principale attiva",
+            "Il primo arresta l'intero sistema operativo del server aziendale, il secondo causa solo la chiusura del browser utente",
+            "L'evento Non-Interrupting può essere associato esclusivamente a timer temporali infiniti non configurabili manualmente",
+            "Il meccanismo Interrupting cancella tutti i record storici archiviati all'interno del database aziendale centralizzato"
+          ],
+          "correctOptionIndex": 0,
+          "explanation": "Se l'evento è di tipo Interrupting (linea perimetrale continua), l'attività in corso viene interrotta istantaneamente e il controllo passa al ramo dell'eccezione. Se è Non-Interrupting (linea perimetrale tratteggiata), l'attività principale prosegue mentre in parallelo viene generato un nuovo token di processo per il flusso secondario."
+        }
+      ]
+    }
+  ]
+}
