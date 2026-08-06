@@ -3,14 +3,18 @@ package org.unicam.intermediate.delegateExpression;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.Expression;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.springframework.stereotype.Component;
 import org.camunda.bpm.engine.impl.cfg.TransactionState;
 import org.camunda.bpm.engine.impl.context.Context;
+import org.camunda.bpm.engine.repository.ProcessDefinition;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component("startProcessByMessageDelegate")
 @Slf4j
@@ -18,6 +22,7 @@ import org.camunda.bpm.engine.impl.context.Context;
 public class StartProcessByMessageDelegate implements JavaDelegate {
 
     private final RuntimeService runtimeService;
+    private final RepositoryService repositoryService;
 
     @Setter
     private Expression messageNameExpr;
@@ -62,9 +67,37 @@ public class StartProcessByMessageDelegate implements JavaDelegate {
             return;
         }
 
+        if (hasActiveMessageStartedProcess(messageName, businessKey)) {
+            log.info("[StartByMessage] Skipped message '{}' because a target process is already active with businessKey '{}'",
+                    messageName, businessKey);
+            return;
+        }
+
         runtimeService.startProcessInstanceByMessage(messageName, businessKey);
         log.info("[StartByMessage] Started process by message '{}' with businessKey '{}'",
                 messageName, businessKey);
+    }
+
+    private boolean hasActiveMessageStartedProcess(String messageName, String businessKey) {
+        List<ProcessDefinition> targetDefinitions = repositoryService.createProcessDefinitionQuery()
+                .messageEventSubscriptionName(messageName)
+                .latestVersion()
+                .active()
+                .list();
+
+        for (ProcessDefinition definition : targetDefinitions) {
+            long activeInstances = runtimeService.createProcessInstanceQuery()
+                    .processDefinitionKey(definition.getKey())
+                    .processInstanceBusinessKey(businessKey)
+                    .active()
+                    .count();
+
+            if (activeInstances > 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private String getStringValue(Expression expression, DelegateExecution execution) {
