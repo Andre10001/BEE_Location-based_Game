@@ -50,6 +50,9 @@ class Outpost {
           'requiredPlayers must be at least 1 (was $requiredPlayers)',
         );
 
+  /// Who currently controls this outpost.
+  OutpostState get state => _state;
+
   /// Whether this outpost is currently unclaimed.
   bool get isNeutral => _state == OutpostState.neutral;
 
