@@ -57,8 +57,9 @@ class Outpost {
   bool get isNeutral => _state == OutpostState.neutral;
 
   /// Whether [team] is currently allowed to *start* a conquest of this
-  /// outpost. A team can never conquer an outpost it already owns.
-  bool canBeConqueredBy(Team team) => _state.ownerTeam != team.current;
+  /// outpost. A team can never conquer an outpost it already owns; a
+  /// neutral outpost can always be conquered by either team.
+  bool canBeConqueredBy(Team team) => isNeutral || _state.ownerTeam != team;
 
   /// Applies the outcome of a correctly answered conquest question started
   /// by [team]. Call this only after the associated question has been
