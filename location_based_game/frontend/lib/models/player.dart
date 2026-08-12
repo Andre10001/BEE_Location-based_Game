@@ -16,12 +16,16 @@ class Player {
   /// Display name the player typed in when joining.
   final String name;
 
+  /// Password of the player typed in when joining.
+  final String password;
+
   /// The team this player has chosen, or `null` if they haven't chosen yet.
   final Team? team;
 
   Player({
     required this.id,
     required this.name,
+    required this.password,
     this.team,
   }) : assert(name.trim().isNotEmpty, 'name must not be empty');
 
@@ -30,12 +34,13 @@ class Player {
 
   /// Returns a copy of this player with [team] replaced. Pass `null` to
   /// clear the current choice.
-  Player copyWithTeam(Team? team) => Player(id: id, name: name, team: team);
+  Player copyWithTeam(Team? team) => Player(id: id, name: name, password: password, team: team);
 
   factory Player.fromJson(Map<String, dynamic> json) {
     return Player(
       id: json['id'] as String,
       name: json['name'] as String,
+      password: json['password'] as String,
       team: json['team'] == null
           ? null
           : Team.values.byName(json['team'] as String),
@@ -45,6 +50,7 @@ class Player {
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
+        'password': password,
         'team': team?.name,
       };
 
