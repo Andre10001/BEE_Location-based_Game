@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>it.unicam</groupId>
-	<artifactId>location-based-game</artifactId>
+	<artifactId>locationbasedgame</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name/>
 	<description/>

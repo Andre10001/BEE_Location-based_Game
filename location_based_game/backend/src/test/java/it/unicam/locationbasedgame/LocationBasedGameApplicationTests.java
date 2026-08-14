@@ -1,4 +1,4 @@
-package it.unicam.location_based_game;
+package it.unicam.locationbasedgame;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
