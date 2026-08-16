@@ -34,8 +34,8 @@ public class Player {
     private String id;
 
     /** Display name the player typed in when joining. */
-    @Column(nullable = false)
-    private String name;
+    @Column(nullable = false, unique = true)
+    private String nickname;
 
     /**
      * Password of the player when joining.

@@ -51,9 +51,9 @@ public interface IPlayerService {
     /**
      * Logs an existing player in by checking the given credentials.
      *
-     * @param name the display name of the player
+     * @param nickname the display name of the player
      * @param password the password typed in by the player
      * @return the matching player
      */
-    PlayerDTO login(String name, String password);
+    PlayerDTO login(String nickname, String password);
 }

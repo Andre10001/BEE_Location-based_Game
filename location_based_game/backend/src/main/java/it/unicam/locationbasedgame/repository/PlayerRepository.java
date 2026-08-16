@@ -10,8 +10,8 @@ public interface PlayerRepository extends JpaRepository<Player, String> {
     /**
      * Finds a player by their display name.
      *
-     * @param name the display name to search for
+     * @param nickname the display name to search for
      * @return the matching player, if any
      */
-    Optional<Player> findByName(String name);
+    Optional<Player> findByNickname(String nickname);
 }
