@@ -1,5 +1,6 @@
 package it.unicam.locationbasedgame.model;
 
+import it.unicam.locationbasedgame.enums.Role;
 import it.unicam.locationbasedgame.enums.Team;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -38,11 +39,16 @@ public class Player {
     private String nickname;
 
     /**
-     * Password of the player when joining.
-     */
+     * Password of the player when joining. */
     @Column(nullable = false)
     private String password;
-
+    
+    /**
+     * Role of the player. */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.player;
+    
     /** The team this player has chosen, or null if they haven't chosen yet. */
     @Enumerated(EnumType.STRING)
     private Team team;
