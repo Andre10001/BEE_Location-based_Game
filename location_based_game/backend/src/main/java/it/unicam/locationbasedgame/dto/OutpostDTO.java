@@ -17,16 +17,22 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OutpostDTO {
-
+    
     private Long id;
 
-    private String place;
+    private String placeId;
 
-    private List<Long> topicIds;
+    private String placeName;
 
     private int difficulty;
 
     private int requiredPlayers;
+
+    private int maxTopics;
+
+    private List<Long> topicIds;
+
+    private List<String> topicNames;
 
     private OutpostState state;
 }

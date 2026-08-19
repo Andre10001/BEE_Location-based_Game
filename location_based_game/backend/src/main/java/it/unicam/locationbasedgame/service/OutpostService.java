@@ -10,7 +10,9 @@ import it.unicam.locationbasedgame.service.interfaces.IOutpostService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,17 +27,40 @@ public class OutpostService implements IOutpostService {
     private final TopicRepository topicRepository;
 
     @Override
-    public OutpostDTO createOutpost(OutpostDTO outpostDTO) {
-        validate(outpostDTO);
-        Outpost outpost = toEntity(outpostDTO);
-        Outpost saved = outpostRepository.save(outpost);
-        return toDto(saved);
+    @Transactional
+    public OutpostDTO assignTopics(String placeId, OutpostDTO outpostDTO) {
+        validate(placeId, outpostDTO);
+
+        // Creates the outpost the first time topics are given to a place.
+        Outpost outpost = outpostRepository.findByPlaceId(placeId)
+                .orElseGet(() -> {
+                    Outpost created = new Outpost();
+                    created.setPlaceId(placeId);
+                    return created;
+                });
+
+        outpost.setPlaceName(outpostDTO.getPlaceName().trim());
+        outpost.setDifficulty(outpostDTO.getDifficulty());
+        outpost.setRequiredPlayers(outpostDTO.getRequiredPlayers());
+        outpost.setMaxTopics(outpostDTO.getMaxTopics());
+
+        List<Topic> topics = new ArrayList<>();
+        for (Long topicId : outpostDTO.getTopicIds()) {
+            Topic topic = topicRepository.findById(topicId)
+                    .orElseThrow(() -> new EntityNotFoundException("Topic not found with id " + topicId));
+            if (!topics.contains(topic)) {
+                topics.add(topic);
+            }
+        }
+        outpost.setTopics(topics);
+
+        return toDto(outpostRepository.save(outpost));
     }
 
     @Override
-    public OutpostDTO getOutpostById(Long id) {
-        Outpost outpost = outpostRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Outpost not found with id " + id));
+    public OutpostDTO getOutpostByPlaceId(String placeId) {
+        Outpost outpost = outpostRepository.findByPlaceId(placeId)
+                .orElseThrow(() -> new EntityNotFoundException("No outpost on place " + placeId));
         return toDto(outpost);
     }
 
@@ -47,53 +72,44 @@ public class OutpostService implements IOutpostService {
     }
 
     @Override
-    public OutpostDTO updateOutpost(Long id, OutpostDTO outpostDTO) {
-        validate(outpostDTO);
-        Outpost outpost = outpostRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Outpost not found with id " + id));
-        outpost.setPlace(outpostDTO.getPlace());
-        outpost.setTopics(resolveTopics(outpostDTO.getTopicIds()));
-        outpost.setDifficulty(outpostDTO.getDifficulty());
-        outpost.setRequiredPlayers(outpostDTO.getRequiredPlayers());
-        Outpost saved = outpostRepository.save(outpost);
-        return toDto(saved);
-    }
-
-    @Override
-    public OutpostDTO conquerOutpost(Long id, String team) {
-        Outpost outpost = outpostRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Outpost not found with id " + id));
+    public OutpostDTO conquerOutpost(String placeId, String team) {
+        Outpost outpost = outpostRepository.findByPlaceId(placeId)
+                .orElseThrow(() -> new EntityNotFoundException("No outpost on place " + placeId));
         outpost.conquer(Team.valueOf(team));
-        Outpost saved = outpostRepository.save(outpost);
-        return toDto(saved);
+        return toDto(outpostRepository.save(outpost));
     }
 
     @Override
-    public void deleteOutpost(Long id) {
-        if (!outpostRepository.existsById(id)) {
-            throw new EntityNotFoundException("Outpost not found with id " + id);
-        }
-        outpostRepository.deleteById(id);
+    public void deleteOutpost(String placeId) {
+                Outpost outpost = outpostRepository.findByPlaceId(placeId)
+                .orElseThrow(() -> new EntityNotFoundException("No outpost on place " + placeId));
+        outpostRepository.delete(outpost);
     }
 
     /**
-     * Checks the data integrity of the provided OutpostDTO.
-     *
-     * @param dto the outpost data to validate
-     * @throws IllegalArgumentException if any field is invalid
-     */
-    private void validate(OutpostDTO dto) {
-        if (dto.getPlace() == null || dto.getPlace().isBlank()) {
-            throw new IllegalArgumentException("place must not be empty");
+     * Checks what was sent before anything is written. */
+    private void validate(String placeId, OutpostDTO dto) {
+        if (placeId == null || placeId.isBlank()) {
+            throw new IllegalArgumentException("placeId must not be empty");
         }
-        if (dto.getTopicIds() == null || dto.getTopicIds().isEmpty() || dto.getTopicIds().size() > 3) {
-            throw new IllegalArgumentException("an Outpost must be linked to 1 to 3 topics");
+        if (dto == null || dto.getTopicIds() == null) {
+            throw new IllegalArgumentException("topicIds must not be null");
+        }
+        if (dto.getPlaceName() == null || dto.getPlaceName().isBlank()) {
+            throw new IllegalArgumentException("placeName must not be empty");
         }
         if (dto.getDifficulty() < 1 || dto.getDifficulty() > 5) {
             throw new IllegalArgumentException("difficulty must be between 1 and 5");
         }
         if (dto.getRequiredPlayers() < 1) {
             throw new IllegalArgumentException("requiredPlayers must be at least 1");
+        }
+        if (dto.getMaxTopics() < 1) {
+            throw new IllegalArgumentException("maxTopics must be at least 1");
+        }
+        if (dto.getTopicIds().size() > dto.getMaxTopics()) {
+            throw new IllegalArgumentException(
+                    "This outpost accepts at most " + dto.getMaxTopics() + " topics");
         }
     }
 
@@ -102,25 +118,11 @@ public class OutpostService implements IOutpostService {
         List<Long> topicIds = outpost.getTopics().stream()
                 .map(Topic::getId)
                 .collect(Collectors.toList());
-        return new OutpostDTO(outpost.getId(), outpost.getPlace(), topicIds, outpost.getDifficulty(),
-                outpost.getRequiredPlayers(), outpost.getState());
-    }
-
-    /** Converts an OutpostDTO into a new Outpost entity. */
-    private Outpost toEntity(OutpostDTO dto) {
-        Outpost outpost = new Outpost();
-        outpost.setPlace(dto.getPlace());
-        outpost.setTopics(resolveTopics(dto.getTopicIds()));
-        outpost.setDifficulty(dto.getDifficulty());
-        outpost.setRequiredPlayers(dto.getRequiredPlayers());
-        return outpost;
-    }
-
-    /** Loads the Topic entities matching the given ids, failing if any id does not exist. */
-    private List<Topic> resolveTopics(List<Long> topicIds) {
-        return topicIds.stream()
-                .map(topicId -> topicRepository.findById(topicId)
-                        .orElseThrow(() -> new EntityNotFoundException("Topic not found with id " + topicId)))
+        List<String> topicNames = outpost.getTopics().stream()
+                .map(Topic::getName)
                 .collect(Collectors.toList());
+       return new OutpostDTO(outpost.getId(), outpost.getPlaceId(), outpost.getPlaceName(),
+                outpost.getDifficulty(), outpost.getRequiredPlayers(), outpost.getMaxTopics(),
+                topicIds, topicNames, outpost.getState());
     }
 }

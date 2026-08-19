@@ -1,5 +1,6 @@
 package it.unicam.locationbasedgame.dto;
 
+import it.unicam.locationbasedgame.enums.Role;
 import it.unicam.locationbasedgame.enums.Team;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,6 +22,8 @@ public class PlayerDTO {
     private String nickname;
 
     private String password;
+
+    private Role role;
 
     private Team team;
 }

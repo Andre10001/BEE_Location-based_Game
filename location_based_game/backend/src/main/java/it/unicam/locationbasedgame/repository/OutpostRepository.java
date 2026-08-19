@@ -8,10 +8,10 @@ import java.util.Optional;
 public interface OutpostRepository extends JpaRepository<Outpost, Long> {
 
     /**
-     * Finds an outpost by the place name it represents on the map.
+     * Finds the outpost of the BEE environment by the place id.
      *
-     * @param place the place name to search for
+     * @param placeId the id of the place in the BEE environment
      * @return the matching outpost, if any
      */
-    Optional<Outpost> findByPlace(String place);
+    Optional<Outpost> findByPlaceId(String placeId);
 }

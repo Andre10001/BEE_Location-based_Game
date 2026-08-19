@@ -44,13 +44,18 @@ public class Outpost {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** The name of the place this outpost represents on the map. */
-    @Column(nullable = false)
-    private String place;
+    /**
+     * Id of the matching place in the BEE environment. */
+    @Column(nullable = false, unique = true)
+    private String placeId;
 
     /**
-     * The topics this outpost draws questions.
-     */
+     * Name of the matching place in the BEE environment. */
+    @Column(nullable = false)
+    private String placeName;
+
+    /**
+     * The topics this outpost draws questions. */
     @ManyToMany
     @JoinTable(
             name = "outpost_topics",
@@ -58,8 +63,12 @@ public class Outpost {
             inverseJoinColumns = @JoinColumn(name = "topic_id")
     )
     private List<Topic> topics;
+    
+    /** How many topics this outpost accepts. */
+    @Column(nullable = false)
+    private int maxTopics;
 
-    /** Difficulty level required for this outpost's question*/
+    /** Difficulty level required for this outpost's question. */
     @Column(nullable = false)
     private int difficulty;
 

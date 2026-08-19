@@ -91,7 +91,7 @@ public class PlayerService implements IPlayerService {
 
     /** Converts a Player entity into its DTO representation. */
     private PlayerDTO toDto(Player player) {
-        return new PlayerDTO(player.getId(), player.getNickname(), player.getPassword(), player.getTeam());
+        return new PlayerDTO(player.getId(), player.getNickname(), player.getPassword(), player.getRole(), player.getTeam());
     }
 
     /** Converts a PlayerDTO into a new Player entity. */
