@@ -1,5 +1,7 @@
 package it.unicam.locationbasedgame.controller;
 
+import it.unicam.locationbasedgame.dto.AttackQuestionDTO;
+import it.unicam.locationbasedgame.dto.AttackResultDTO;
 import it.unicam.locationbasedgame.dto.OutpostDTO;
 import it.unicam.locationbasedgame.service.interfaces.IOutpostService;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Contains the calls to the database for the Outpost entity.
@@ -39,6 +42,22 @@ public class OutpostController {
     @GetMapping("/getAllOutposts")
     public ResponseEntity<List<OutpostDTO>> getAllOutposts() {
         return ResponseEntity.ok(outpostService.getAllOutposts());
+    }
+
+    @GetMapping("/drawQuestion/{placeId}")
+    public ResponseEntity<AttackQuestionDTO> drawQuestion(@PathVariable String placeId,
+                                                          @RequestParam String team) {
+        return ResponseEntity.ok(outpostService.drawQuestion(placeId, team));
+    }
+
+    @PostMapping("/answer/{placeId}")
+    public ResponseEntity<AttackResultDTO> answerQuestion(@PathVariable String placeId,
+                                                          @RequestParam String team,
+                                                          @RequestBody Map<String, Object> body) {
+        Long questionId = Long.valueOf(body.get("questionId").toString());
+        int optionIndex = Integer.parseInt(body.get("optionIndex").toString());
+        return ResponseEntity.ok(
+                outpostService.answerQuestion(placeId, questionId, optionIndex, team));
     }
 
     @PostMapping("/conquerOutpost/{placeId}")
