@@ -1,0 +1,252 @@
+{
+  "physicalPlaces" : [ {
+    "id" : "Place_318vlv1vh9b",
+    "name" : "RoomB1",
+    "coordinates" : [ [ 13.067470210235822, 43.13912314643534 ], [ 13.067569240533505, 43.139173481754284 ], [ 13.067726627970897, 43.139017313065494 ], [ 13.067616987284174, 43.13895923369935 ] ],
+    "attributes" : {
+      "isCaptured" : "false",
+      "status" : "neutral",
+      "isBeingCaptured" : "false",
+      "difficulty" : "1",
+      "requiredPlayers" : "1",
+      "maxTopics" : "3",
+      "type" : "outpost",
+      "lastAttempt" : "lost"
+    }
+  }, {
+    "id" : "Place_q3usqdnhk1",
+    "name" : "RoomB2",
+    "coordinates" : [ [ 13.067726627970897, 43.139017313065494 ], [ 13.067887552204633, 43.13910120538591 ], [ 13.067825658268582, 43.13915670331926 ], [ 13.067665003763889, 43.13907846012552 ] ],
+    "attributes" : {
+      "isCaptured" : "false",
+      "status" : "neutral",
+      "isBeingCaptured" : "false",
+      "difficulty" : "1",
+      "requiredPlayers" : "1",
+      "maxTopics" : "3",
+      "type" : "outpost",
+      "lastAttempt" : "lost"
+    }
+  }, {
+    "id" : "Place_nczxlr70vvb",
+    "name" : "EntranceB",
+    "coordinates" : [ [ 13.067717785980031, 43.13925092062556 ], [ 13.067751385545318, 43.139268989681426 ], [ 13.067818584675889, 43.13919929472229 ], [ 13.067781448314259, 43.13918251629431 ] ],
+    "attributes" : [ ]
+  }, {
+    "id" : "Place_rfr88pc5k8d",
+    "name" : "BathroomB",
+    "coordinates" : [ [ 13.067825658268582, 43.13915670331926 ], [ 13.067850415843003, 43.13917090045692 ], [ 13.067914078177228, 43.13911282123658 ], [ 13.067887552204633, 43.13910120538591 ] ],
+    "attributes" : [ ]
+  }, {
+    "id" : "Place_66wzit8vt4a",
+    "name" : "RoomB3",
+    "coordinates" : [ [ 13.067569240533505, 43.139173481754284 ], [ 13.067717785980031, 43.13925092062556 ], [ 13.067781448314259, 43.13918251629431 ], [ 13.067633397301508, 43.139109821840094 ] ],
+    "attributes" : {
+      "isCaptured" : "false",
+      "status" : "neutral",
+      "isBeingCaptured" : "false",
+      "difficulty" : "1",
+      "maxTopics" : "3",
+      "requiredPlayers" : "1",
+      "type" : "outpost",
+      "lastAttempt" : "lost"
+    }
+  }, {
+    "id" : "Place_853pxt6jt1d",
+    "name" : "HallwayB",
+    "coordinates" : [ [ 13.067633397301508, 43.139109821840094 ], [ 13.067818584675889, 43.13919929472229 ], [ 13.067850415843003, 43.13917090045692 ], [ 13.067665003763889, 43.13907846012552 ] ],
+    "attributes" : [ ]
+  }, {
+    "id" : "Place_cqi2lh5tlh8",
+    "name" : "Parking",
+    "coordinates" : [ [ 13.06755479733689, 43.1390286841509 ], [ 13.067477283828513, 43.138991500020694 ], [ 13.067380021929003, 43.13910249603612 ], [ 13.06771071238734, 43.13936191617009 ], [ 13.067928225362612, 43.13946774894342 ], [ 13.068998432229709, 43.1398973219456 ], [ 13.069073351736602, 43.13980922850831 ], [ 13.068977621255573, 43.139766700596596 ], [ 13.068494806655613, 43.13954798515482 ], [ 13.068623834695257, 43.13940217442567 ], [ 13.068615510305603, 43.139356608501515 ], [ 13.068161831069434, 43.139156118031764 ], [ 13.068076770809139, 43.13919800407413 ], [ 13.067919383371747, 43.13935159101166 ], [ 13.067470210235822, 43.13912314643534 ] ],
+    "attributes" : [ ]
+  }, {
+    "id" : "Place_qlvu51zhc8o",
+    "name" : "RoomA1",
+    "coordinates" : [ [ 13.068619254716575, 43.13960436031158 ], [ 13.068677509780715, 43.13953391051433 ], [ 13.068559855725594, 43.1394744751895 ], [ 13.068494806655613, 43.13954798515482 ] ],
+    "attributes" : {
+      "isCaptured" : "false",
+      "status" : "neutral",
+      "isBeingCaptured" : "false",
+      "difficulty" : "1",
+      "requiredPlayers" : "1",
+      "maxTopics" : "3",
+      "type" : "outpost",
+      "lastAttempt" : "lost"
+    }
+  }, {
+    "id" : "Place_qude1jsrdoi",
+    "name" : "TeamLabs",
+    "coordinates" : [ [ 13.068677509780715, 43.13953391051433 ], [ 13.068745185586494, 43.13946585892475 ], [ 13.068623834695257, 43.13940217442567 ], [ 13.068559855725594, 43.1394744751895 ] ],
+    "attributes" : {
+      "isCaptured" : "false",
+      "status" : "neutral",
+      "isBeingCaptured" : "false",
+      "difficulty" : "1",
+      "requiredPlayers" : "1",
+      "maxTopics" : "3",
+      "type" : "outpost",
+      "lastAttempt" : "lost"
+    }
+  }, {
+    "id" : "Place_m7hkrapzeh",
+    "name" : "RoomLA1",
+    "coordinates" : [ [ 13.068732498807424, 43.13965566000806 ], [ 13.068788798883553, 43.139589888378026 ], [ 13.069029423970775, 43.1396864775125 ], [ 13.06896288235293, 43.13976002387224 ] ],
+    "attributes" : {
+      "isCaptured" : "false",
+      "status" : "neutral",
+      "isBeingCaptured" : "false",
+      "difficulty" : "1",
+      "maxTopics" : "3",
+      "requiredPlayers" : "1",
+      "type" : "outpost",
+      "lastAttempt" : "lost"
+    }
+  }, {
+    "id" : "Place_kj1a7j4xxf",
+    "name" : "RoomLA2",
+    "coordinates" : [ [ 13.069047470852317, 43.13966233024317 ], [ 13.068909111427164, 43.139603059632606 ], [ 13.068942197376657, 43.139560253044806 ], [ 13.069085068522194, 43.13962062130102 ] ],
+    "attributes" : {
+      "isCaptured" : "false",
+      "status" : "neutral",
+      "isBeingCaptured" : "false",
+      "difficulty" : "1",
+      "requiredPlayers" : "1",
+      "maxTopics" : "3",
+      "type" : "outpost",
+      "lastAttempt" : "lost"
+    }
+  }, {
+    "id" : "Place_2qfu47jtn9v",
+    "name" : "HallwayA",
+    "coordinates" : [ [ 13.068619254716575, 43.13960436031158 ], [ 13.068732498807424, 43.13965566000806 ], [ 13.068788798883553, 43.139589888378026 ], [ 13.069029423970775, 43.1396864775125 ], [ 13.069047470852317, 43.13966233024317 ], [ 13.068909111427164, 43.139603059632606 ], [ 13.068942197376657, 43.139560253044806 ], [ 13.068745185586494, 43.13946585892475 ], [ 13.068677509780715, 43.13953391051433 ] ],
+    "attributes" : [ ]
+  }, {
+    "id" : "Place_8wx2uelk3f4",
+    "name" : "TutorsRoomB",
+    "coordinates" : [ [ 13.067751385545318, 43.139268989681426 ], [ 13.067919383371747, 43.13935159101166 ], [ 13.068076770809139, 43.13919800407413 ], [ 13.067914078177228, 43.13911282123658 ], [ 13.067850415843003, 43.13917090045692 ], [ 13.067818584675889, 43.13919929472229 ] ],
+    "attributes" : {
+      "isCaptured" : "false",
+      "status" : "neutral",
+      "isBeingCaptured" : "false",
+      "maxTopics" : "3",
+      "difficulty" : "1",
+      "requiredPlayers" : "1",
+      "type" : "outpost",
+      "lastAttempt" : "lost"
+    }
+  } ],
+  "edges" : [ ],
+  "logicalPlaces" : [ {
+    "id" : "Lp_bpcomi",
+    "name" : "NeutralOutpost",
+    "conditions" : [ {
+      "attribute" : "isCaptured",
+      "operator" : "==",
+      "value" : "false"
+    }, {
+      "attribute" : "status",
+      "operator" : "==",
+      "value" : "neutral"
+    } ],
+    "operator" : "AND",
+    "attributes" : {
+      "isCaptured" : "MIN",
+      "status" : "MIN",
+      "isBeingCaptured" : "MIN",
+      "difficulty" : "MIN",
+      "nTopics" : "MIN",
+      "playerRequirements" : "MIN"
+    }
+  }, {
+    "id" : "Lp_accduo",
+    "name" : "Team1Outpost",
+    "conditions" : [ {
+      "attribute" : "isCaptured",
+      "operator" : "==",
+      "value" : "true"
+    }, {
+      "attribute" : "status",
+      "operator" : "==",
+      "value" : "team1"
+    } ],
+    "operator" : "AND",
+    "attributes" : {
+      "isCaptured" : "MIN",
+      "status" : "MIN",
+      "isBeingCaptured" : "MIN",
+      "difficulty" : "MIN",
+      "nTopics" : "MIN",
+      "playerRequirements" : "MIN"
+    }
+  }, {
+    "id" : "Lp_5s3am3",
+    "name" : "Team2Outpost",
+    "conditions" : [ {
+      "attribute" : "isCaptured",
+      "operator" : "==",
+      "value" : "true"
+    }, {
+      "attribute" : "status",
+      "operator" : "==",
+      "value" : "team2"
+    } ],
+    "operator" : "AND",
+    "attributes" : {
+      "isCaptured" : "MIN",
+      "status" : "MIN",
+      "isBeingCaptured" : "MIN",
+      "difficulty" : "MIN",
+      "nTopics" : "MIN",
+      "playerRequirements" : "MIN"
+    }
+  }, {
+    "id" : "Lp_njmlv8",
+    "name" : "IsUnderAttack",
+    "conditions" : [ {
+      "attribute" : "isBeingCaptured",
+      "operator" : "==",
+      "value" : "true"
+    } ],
+    "operator" : "AND",
+    "attributes" : {
+      "isCaptured" : "MIN",
+      "status" : "MIN",
+      "isBeingCaptured" : "MIN",
+      "difficulty" : "MIN",
+      "nTopics" : "MIN",
+      "playerRequirements" : "MIN"
+    }
+  }, {
+    "id" : "Lp_oo9oc2",
+    "name" : "Outpost",
+    "conditions" : [ {
+      "attribute" : "type",
+      "operator" : "==",
+      "value" : "Outpost"
+    } ],
+    "operator" : "AND",
+    "attributes" : {
+      "isCaptured" : "MIN",
+      "status" : "MIN",
+      "isBeingCaptured" : "MIN",
+      "difficulty" : "MIN",
+      "nTopics" : "MIN",
+      "playerRequirements" : "MIN"
+    }
+  } ],
+  "views" : [ {
+    "id" : "View_upagzb",
+    "name" : "Outposts",
+    "logicalPlaces" : [ "Lp_bpcomi", "Lp_accduo", "Lp_5s3am3", "Lp_njmlv8", "Lp_oo9oc2" ],
+    "aggregations" : {
+      "isCaptured" : "MIN",
+      "status" : "MIN",
+      "isBeingCaptured" : "MIN",
+      "difficulty" : "MIN",
+      "nTopics" : "MIN",
+      "playerRequirements" : "MIN"
+    }
+  } ]
+}

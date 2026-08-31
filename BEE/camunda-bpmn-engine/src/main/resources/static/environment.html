@@ -318,6 +318,7 @@
     const participantLayers = L.layerGroup().addTo(map);
     const polygonsByPlaceId = new Map();
     const placeCentersById = new Map();
+    const placeCentersByName = new Map();
     map.setView([43.1376, 13.0746], 16);
 
     function invalidateMapSize() {
@@ -602,6 +603,7 @@
       participantLayers.clearLayers();
       polygonsByPlaceId.clear();
       placeCentersById.clear();
+      placeCentersByName.clear();
 
       if (!Array.isArray(places) || places.length === 0) {
         return;
@@ -632,6 +634,9 @@
           const placeId = String(place.id);
           polygonsByPlaceId.set(placeId, polygon);
           placeCentersById.set(placeId, polygon.getBounds().getCenter());
+          if (place.name) {
+            placeCentersByName.set(String(place.name), polygon.getBounds().getCenter());
+          }
         }
 
         bounds.push(...latLngs);
@@ -691,7 +696,7 @@
       }
 
       for (const [placeId, placeParticipants] of groupedByPlace.entries()) {
-        const center = placeCentersById.get(placeId);
+        const center = placeCentersById.get(placeId) || placeCentersByName.get(placeId);
         if (!center) {
           continue;
         }

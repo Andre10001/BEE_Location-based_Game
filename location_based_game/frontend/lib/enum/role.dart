@@ -8,6 +8,6 @@ enum Role {
         Role.admin => 'Administrator',
       };
 
-  /// True when this account is allowed to open the admin menu.
+  /* True when this account is allowed to open the admin menu. */
   bool get canManageContent => this == Role.admin;
 }

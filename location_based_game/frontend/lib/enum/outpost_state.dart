@@ -1,7 +1,6 @@
 import 'team.dart';
 
-/// Ownership status of an outpost: unclaimed (neutral) or belonging to one
-/// of the two teams.
+/// Ownership status of an outpost.
 enum OutpostState {
   neutral,
   team1,
@@ -13,7 +12,7 @@ enum OutpostState {
         OutpostState.team2 => 'Team 2',
       };
 
-  /// The team that owns this outpost, or null when it is neutral.
+  /* The team that owns this outpost, or null when it is neutral. */
   Team? get ownerTeam => switch (this) {
         OutpostState.neutral => null,
         OutpostState.team1 => Team.team1,

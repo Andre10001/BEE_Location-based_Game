@@ -3,20 +3,10 @@ import '../enum/outpost_state.dart';
 /// A place on the map that players can try to conquer.
 class Outpost {
   final int? id;
-
-  /// Name of the place this outpost stands on.
   final String place;
-
-  /// Ids of the topics its questions are drawn from.
   final List<int> topicIds;
-
-  /// Difficulty of the questions for the conquer.
   final int difficulty;
-
-  /// How many players must answer to conquer this outpost.
   final int requiredPlayers;
-
-  /// Which team holds the outpost.
   final OutpostState state;
 
   Outpost({
@@ -28,7 +18,7 @@ class Outpost {
     this.state = OutpostState.neutral,
   });
 
-  /// Builds an Outpost from the JSON sent by the backend.
+  /* Builds an Outpost from the JSON sent by the backend. */
   factory Outpost.fromJson(Map<String, dynamic> json) {
     return Outpost(
       id: json['id'] as int?,
@@ -42,7 +32,7 @@ class Outpost {
     );
   }
 
-  /// Builds the JSON body for the backend.
+  /* Builds the JSON body for the backend. */
   Map<String, dynamic> toJson() {
     return {
       'place': place,

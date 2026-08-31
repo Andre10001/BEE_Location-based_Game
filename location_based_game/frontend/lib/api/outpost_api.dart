@@ -4,7 +4,7 @@ import 'api_client.dart';
 /// All the requests about outposts.
 class OutpostApi {
   
-  /// Loads every outpost placed on the map.
+  /* Loads every outpost placed on the map. */
   static Future<List<Outpost>> getAllOutposts() async {
     final json = await ApiClient.get('/api/outposts/getAllOutposts');
     final List<dynamic> list = json as List<dynamic>;
@@ -13,7 +13,7 @@ class OutpostApi {
         .toList();
   }
 
-  /// Saves a new outpost.
+  /* Saves a new outpost. */
   static Future<Outpost> createOutpost(Outpost outpost) async {
     final json =
         await ApiClient.post('/api/outposts/createOutpost', outpost.toJson());

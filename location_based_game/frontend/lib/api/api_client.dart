@@ -5,16 +5,19 @@ import 'package:http/http.dart' as http;
 /// Knows where the backend is and how to talk to it.
 class ApiClient {
 
-  /// Address of the Spring Boot backend. (Different for Android: http://192.168.1.10:8082)
+  /* Address of the Spring Boot backend. (Different for Android: http://192.168.1.10:8080) */
   static const String baseUrl = 'http://localhost:8080';
 
-  /// Asks the backend for data and returns the decoded JSON.
+  /* Address of BEE. */
+  static const String beeUrl = 'http://localhost:8082';
+
+  /* Asks the backend for data and returns the decoded JSON. */
   static Future<dynamic> get(String path) async {
     final response = await http.get(Uri.parse('$baseUrl$path'));
     return _readResponse(response);
   }
 
-  /// Sends [body] to the backend as JSON and returns the decoded answer.
+  /* Sends the body object to the backend as JSON and returns the decoded answer. */
   static Future<dynamic> post(String path, Object body) async {
     final response = await http.post(
       Uri.parse('$baseUrl$path'),
@@ -24,7 +27,7 @@ class ApiClient {
     return _readResponse(response);
   }
 
-  /// Turns the raw HTTP answer into usable data.
+  /* Turns the raw HTTP answer into usable data. */
   static dynamic _readResponse(http.Response response) {
     if (response.statusCode == 200 || response.statusCode == 201) {
       if (response.body.isEmpty) return null;

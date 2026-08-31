@@ -4,14 +4,8 @@ import '../enum/team.dart';
 /// A person playing the game.
 class Player {
   final String? id;
-
-  /// The nickname of the player.
   final String nickname;
-
-  /// The team this player belongs to.
   final Team? team;
-
-  /// If the player is the admin or a simple player.
   final Role role;
 
   Player({
@@ -21,7 +15,7 @@ class Player {
     this.role = Role.player,
     });
 
-  /// Builds a Player from the JSON sent by the backend.
+  /* Builds a Player from the JSON sent by the backend. */
   factory Player.fromJson(Map<String, dynamic> json) {
     return Player(
       id: json['id'] as String?,

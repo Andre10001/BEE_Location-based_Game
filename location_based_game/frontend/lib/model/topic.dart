@@ -1,18 +1,14 @@
 import 'question.dart';
 
-/// A subject (for example "History") holding a group of questions.
+/// A subject holding a group of questions.
 class Topic {
   final int? id;
-  
-  /// The name of the Topic.
   final String name;
-  
-  /// The list of questions associated with this topic.
   final List<Question> questions;
 
   Topic({this.id, required this.name, required this.questions});
 
-  /// Builds a Topic from the JSON sent by the backend.
+  /* Builds a Topic from the JSON sent by the backend. */
   factory Topic.fromJson(Map<String, dynamic> json) {
     final List<dynamic> rawQuestions =
         (json['questions'] as List<dynamic>?) ?? [];
@@ -26,15 +22,11 @@ class Topic {
   }
 
   
-  /// Builds the JSON body for the backend.
+  /* Builds the JSON body for the backend. */
   Map<String, dynamic> toJson() {
     return {
       'name': name,
       'questions': questions.map((question) => question.toJson()).toList(),
     };
   }
-
-
-  @override
-  int get hashCode => id.hashCode;
 }
