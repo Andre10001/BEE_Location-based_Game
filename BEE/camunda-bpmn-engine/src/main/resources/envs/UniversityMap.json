@@ -11,7 +11,7 @@
       "requiredPlayers" : "1",
       "maxTopics" : "3",
       "type" : "outpost",
-      "lastAttempt" : "lost"
+      "lastAttempt" : "pending"
     }
   }, {
     "id" : "Place_q3usqdnhk1",
@@ -25,7 +25,7 @@
       "requiredPlayers" : "1",
       "maxTopics" : "3",
       "type" : "outpost",
-      "lastAttempt" : "lost"
+      "lastAttempt" : "pending"
     }
   }, {
     "id" : "Place_nczxlr70vvb",
@@ -49,7 +49,7 @@
       "maxTopics" : "3",
       "requiredPlayers" : "1",
       "type" : "outpost",
-      "lastAttempt" : "lost"
+      "lastAttempt" : "pending"
     }
   }, {
     "id" : "Place_853pxt6jt1d",
@@ -73,7 +73,7 @@
       "requiredPlayers" : "1",
       "maxTopics" : "3",
       "type" : "outpost",
-      "lastAttempt" : "lost"
+      "lastAttempt" : "pending"
     }
   }, {
     "id" : "Place_qude1jsrdoi",
@@ -101,7 +101,7 @@
       "maxTopics" : "3",
       "requiredPlayers" : "1",
       "type" : "outpost",
-      "lastAttempt" : "lost"
+      "lastAttempt" : "pending"
     }
   }, {
     "id" : "Place_kj1a7j4xxf",
@@ -115,7 +115,7 @@
       "requiredPlayers" : "1",
       "maxTopics" : "3",
       "type" : "outpost",
-      "lastAttempt" : "lost"
+      "lastAttempt" : "pending"
     }
   }, {
     "id" : "Place_2qfu47jtn9v",
@@ -134,7 +134,7 @@
       "difficulty" : "1",
       "requiredPlayers" : "1",
       "type" : "outpost",
-      "lastAttempt" : "lost"
+      "lastAttempt" : "pending"
     }
   } ],
   "edges" : [ ],

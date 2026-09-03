@@ -90,6 +90,10 @@ public class OutpostService implements IOutpostService {
             throw new IllegalArgumentException("Your team already holds this outpost");
         }
 
+        if (outpost.isBeingCaptured()) {
+            throw new IllegalArgumentException("Somebody is already answering for this outpost");
+        }
+
         List<Question> candidates = new ArrayList<>();
         List<String> topicOfCandidate = new ArrayList<>();
         for (Topic topic : outpost.getTopics()) {
@@ -105,6 +109,10 @@ public class OutpostService implements IOutpostService {
                     "No question of difficulty " + outpost.getDifficulty()
                     + " among the topics of this outpost");
         }
+
+        outpost.startAttempt();
+        outpostRepository.save(outpost);
+        syncToBee(outpost);
 
         int chosen = random.nextInt(candidates.size());
         Question question = candidates.get(chosen);
@@ -151,17 +159,41 @@ public class OutpostService implements IOutpostService {
             message = "Wrong answer: the outpost stays as it is.";
         }
 
+        outpost.endAttempt(correct);
+        outpostRepository.save(outpost);
+        syncToBee(outpost);
+
         return new AttackResultDTO(correct, question.getCorrectOptionIndex(),
                 question.getExplanation(), outpost.getState(), message);
     }
 
-    /** Turns the team name sent by a client into a Team, or refuses it. */
-    private Team parseTeam(String team) {
-        try {
-            return Team.valueOf(team);
-        } catch (IllegalArgumentException | NullPointerException e) {
-            throw new IllegalArgumentException("Unknown team: " + team);
+    @Override
+    @Transactional
+    public void cancelAttack(String placeId) {
+        Outpost outpost = outpostRepository.findByPlaceId(placeId)
+                .orElseThrow(() -> new EntityNotFoundException("No outpost on place " + placeId));
+ 
+        if (!outpost.isBeingCaptured()) {
+            return;
         }
+        outpost.endAttempt(false);
+        outpostRepository.save(outpost);
+        syncToBee(outpost);
+    }
+
+
+    @Override
+    @Transactional
+    public void resetAttempt(String placeId) {
+        Outpost outpost = outpostRepository.findByPlaceId(placeId)
+                .orElseThrow(() -> new EntityNotFoundException("No outpost on place " + placeId));
+ 
+        if (Outpost.ATTEMPT_PENDING.equals(outpost.getLastAttempt())) {
+            return;
+        }
+        outpost.resetAttempt();
+        outpostRepository.save(outpost);
+        syncToBee(outpost);
     }
 
     @Override
@@ -179,8 +211,34 @@ public class OutpostService implements IOutpostService {
         outpostRepository.delete(outpost);
     }
 
-    /**
-     * Checks what was sent before anything is written. */
+    /** Synchronize outpost data between the application and BEE. */
+    private void syncToBee(Outpost outpost) {
+        String placeId = outpost.getPlaceId();
+        boolean captured = outpost.getState() != OutpostState.neutral;
+
+        beeClient.updatePlaceAttribute(placeId, "status", outpost.getState().name());
+        beeClient.updatePlaceAttribute(placeId, "isCaptured", String.valueOf(captured));
+        beeClient.updatePlaceAttribute(placeId, "isBeingCaptured",
+                String.valueOf(outpost.isBeingCaptured()));
+        beeClient.updatePlaceAttribute(placeId, "lastAttempt", outpost.getLastAttempt());
+        beeClient.updatePlaceAttribute(placeId, "difficulty",
+                String.valueOf(outpost.getDifficulty()));
+        beeClient.updatePlaceAttribute(placeId, "requiredPlayers",
+                String.valueOf(outpost.getRequiredPlayers()));
+        beeClient.updatePlaceAttribute(placeId, "maxTopics",
+                String.valueOf(outpost.getMaxTopics()));
+    }
+
+    /** Turns the team name sent by a client into a Team, or refuses it. */
+    private Team parseTeam(String team) {
+        try {
+            return Team.valueOf(team);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new IllegalArgumentException("Unknown team: " + team);
+        }
+    }
+
+    /** Checks what was sent before anything is written. */
     private void validate(String placeId, OutpostDTO dto) {
         if (placeId == null || placeId.isBlank()) {
             throw new IllegalArgumentException("placeId must not be empty");

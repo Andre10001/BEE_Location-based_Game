@@ -56,6 +56,20 @@ public interface IOutpostService {
     AttackResultDTO answerQuestion(String placeId, Long questionId, int optionIndex, String team);
 
     /**
+     * Frees an outpost whose question was never answered.
+     *
+     * @param placeId the id of the place in the BEE environment
+     */
+    void cancelAttack(String placeId);
+
+    /**
+     * Set the outpost's attempt state back to pending.
+     *
+     * @param placeId the id of the place in the BEE environment
+     */
+    void resetAttempt(String placeId);
+
+    /**
      * Attempts a conquest of the given outpost by the given team, applying
      * the domain rules defined in the Outpost entity.
      *

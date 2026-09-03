@@ -31,24 +31,29 @@ public class BeeClient {
      * @param status the new value, one of neutral, team1, team2
      */
     public void updatePlaceStatus(String placeId, String status) {
-        String url = String.format("%s/api/environment/pps/%s/attributes/status",
-                beeBaseUrl, placeId);
+        updatePlaceAttribute(placeId, "status", status);
+    }
+
+    /** Writes one attribute onto the matching place in BEE. */
+    public void updatePlaceAttribute(String placeId, String key, String value) {
+        String url = String.format("%s/api/environment/pps/%s/attributes/%s",
+                beeBaseUrl, placeId, key);
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .header("Content-Type", "application/json")
                     .timeout(Duration.ofSeconds(5))
-                    .PUT(HttpRequest.BodyPublishers.ofString("{\"value\":\"" + status + "\"}"))
+                    .PUT(HttpRequest.BodyPublishers.ofString("{\"value\":\"" + value + "\"}"))
                     .build();
 
             HttpResponse<String> response =
                     httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                log.info("[BeeClient] Place {} set to status {}", placeId, status);
+                log.info("[BeeClient] Place {} attribute {} set to {}", placeId, key, value);
             } else {
-                log.warn("[BeeClient] BEE refused the status update for {}: HTTP {}",
-                        placeId, response.statusCode());
+                log.warn("[BeeClient] BEE refused {} on {}: HTTP {}",
+                        key, placeId, response.statusCode());
             }
         } catch (Exception e) {
             if (e instanceof InterruptedException) {

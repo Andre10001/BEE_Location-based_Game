@@ -13,7 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.unicam.intermediate.models.dto.Response;
+import org.unicam.intermediate.models.pojo.PhysicalPlace;
 import org.unicam.intermediate.service.environmental.EnvironmentMapService;
+import org.unicam.intermediate.service.environmental.EnvironmentDataService;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -24,6 +28,7 @@ import java.util.List;
 public class EnvironmentMapController {
 
     private final EnvironmentMapService environmentMapService;
+    private final EnvironmentDataService environmentDataService;
 
     @GetMapping
     public ResponseEntity<Response<List<String>>> listMaps() {
@@ -62,6 +67,25 @@ public class EnvironmentMapController {
             log.error("[Environment Maps API] Failed to read view: {}", viewReference, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Response.error("Failed to read view: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/logical-places/{reference}/places")
+    public ResponseEntity<Response<List<String>>> getPlacesInLogicalPlace(
+            @PathVariable String reference) {
+        try {
+            List<String> placeIds = new ArrayList<>();
+            for (PhysicalPlace place : environmentDataService.getPhysicalPlaces()) {
+                if (environmentDataService.isPhysicalPlaceInLogicalPlace(
+                        place.getId(), reference)) {
+                    placeIds.add(place.getId());
+                }
+            }
+            return ResponseEntity.ok(Response.ok(placeIds));
+        } catch (Exception e) {
+            log.error("[Environment Maps API] Failed to read logical place: {}", reference, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Response.error("Failed to read logical place: " + e.getMessage()));
         }
     }
     

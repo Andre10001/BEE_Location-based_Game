@@ -60,6 +60,18 @@ public class OutpostController {
                 outpostService.answerQuestion(placeId, questionId, optionIndex, team));
     }
 
+    @PostMapping("/cancelAttack/{placeId}")
+    public ResponseEntity<Void> cancelAttack(@PathVariable String placeId) {
+        outpostService.cancelAttack(placeId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/resetAttempt/{placeId}")
+    public ResponseEntity<Void> resetAttempt(@PathVariable String placeId) {
+        outpostService.resetAttempt(placeId);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/conquerOutpost/{placeId}")
     public ResponseEntity<OutpostDTO> conquerOutpost(@PathVariable String placeId,
                                                      @RequestParam String team) {

@@ -39,6 +39,10 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class Outpost {
 
+    public static final String ATTEMPT_PENDING = "pending";
+    public static final String ATTEMPT_WON = "won";
+    public static final String ATTEMPT_LOST = "lost";
+
     /** Primary key. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -82,6 +86,18 @@ public class Outpost {
     private OutpostState state = OutpostState.neutral;
 
     /**
+     * Says whether the outpost is currently being captured.
+     */
+    @Column(nullable = false)
+    private boolean beingCaptured = false;
+    
+    /**
+     * Used to save the outcome of the last conquest attempt.
+     */
+    @Column(nullable = false)
+    private String lastAttempt = ATTEMPT_PENDING;
+
+    /**
      * Tells whether this outpost is currently unclaimed.
      *
      * @return true if the state is neutral, false otherwise
@@ -101,6 +117,31 @@ public class Outpost {
      */
     public boolean canBeConqueredBy(Team team) {
         return isNeutral() || state.getOwnerTeam() != team;
+    }
+ 
+    /**
+     * Marks the beginning of an attack.
+     */
+    public void startAttempt() {
+        this.beingCaptured = true;
+        this.lastAttempt = ATTEMPT_PENDING;
+    }
+ 
+    /**
+     * Marks the end of an attack.
+     *
+     * @param won true when the player answered correctly
+     */
+    public void endAttempt(boolean won) {
+        this.beingCaptured = false;
+        this.lastAttempt = won ? ATTEMPT_WON : ATTEMPT_LOST;
+    }
+
+    /**
+     * Resets the outpost's attempt state back to pending.
+     */
+    public void resetAttempt() {
+        this.lastAttempt = ATTEMPT_PENDING;
     }
 
     /**
