@@ -8,9 +8,9 @@ import java.util.Optional;
 public interface PlayerRepository extends JpaRepository<Player, String> {
 
     /**
-     * Finds a player by their display name.
+     * Finds a player by their nickname.
      *
-     * @param nickname the display name to search for
+     * @param nickname the nickname to search for
      * @return the matching player, if any
      */
     Optional<Player> findByNickname(String nickname);

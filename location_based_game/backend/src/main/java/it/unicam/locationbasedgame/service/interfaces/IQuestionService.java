@@ -10,7 +10,7 @@ import java.util.List;
 public interface IQuestionService {
 
     /**
-     * Creates a new standalone question.
+     * Creates a new question.
      *
      * @param questionDTO the data of the question to create
      * @return the created question

@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * What the player is told after answering a conquest question.
+ * Data Transfer Object used to expose and receive
+ * data about the result of an attack.
  */
 @Getter
 @Setter
@@ -24,4 +25,6 @@ public class AttackResultDTO {
     private OutpostState state;
 
     private String message;
+
+    private int penaltySeconds;
 }

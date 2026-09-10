@@ -49,6 +49,17 @@ public class PlayerController {
         return ResponseEntity.ok(playerService.updatePlayerTeam(id, team));
     }
 
+    @PutMapping("/linkParticipant/{id}")
+    public ResponseEntity<PlayerDTO> linkParticipant(@PathVariable String id,
+                                                     @RequestParam(required = false) String participantId) {
+        return ResponseEntity.ok(playerService.linkParticipant(id, participantId));
+    }
+
+    @PutMapping("/leaveMatch/{id}")
+    public ResponseEntity<PlayerDTO> leaveMatch(@PathVariable String id) {
+        return ResponseEntity.ok(playerService.leaveMatch(id));
+    }
+
     @DeleteMapping("/deletePlayer/{id}")
     public ResponseEntity<Void> deletePlayer(@PathVariable String id) {
         playerService.deletePlayer(id);

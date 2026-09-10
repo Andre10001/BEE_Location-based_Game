@@ -1,8 +1,9 @@
 package it.unicam.locationbasedgame.controller;
 
-import it.unicam.locationbasedgame.dto.AttackQuestionDTO;
 import it.unicam.locationbasedgame.dto.AttackResultDTO;
+import it.unicam.locationbasedgame.dto.AttackStateDTO;
 import it.unicam.locationbasedgame.dto.OutpostDTO;
+import it.unicam.locationbasedgame.service.interfaces.ICaptureService;
 import it.unicam.locationbasedgame.service.interfaces.IOutpostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,7 @@ import java.util.Map;
 public class OutpostController {
 
     private final IOutpostService outpostService;
+    private final ICaptureService captureService;
 
     @PostMapping("/assignTopics/{placeId}")
     public ResponseEntity<OutpostDTO> assignTopics(@PathVariable String placeId,
@@ -39,30 +41,47 @@ public class OutpostController {
         return ResponseEntity.ok(outpostService.getOutpostByPlaceId(placeId));
     }
 
+    @PostMapping("/syncWithEnvironment")
+    public ResponseEntity<List<OutpostDTO>> syncWithEnvironment() {
+        return ResponseEntity.ok(outpostService.syncWithEnvironment());
+    }
+
     @GetMapping("/getAllOutposts")
     public ResponseEntity<List<OutpostDTO>> getAllOutposts() {
         return ResponseEntity.ok(outpostService.getAllOutposts());
     }
+    
+    @PostMapping("/joinAttack/{placeId}")
+    public ResponseEntity<AttackStateDTO> joinAttack(@PathVariable String placeId,
+                                                     @RequestParam String playerId) {
+        return ResponseEntity.ok(captureService.join(placeId, playerId));
+    }
 
-    @GetMapping("/drawQuestion/{placeId}")
-    public ResponseEntity<AttackQuestionDTO> drawQuestion(@PathVariable String placeId,
-                                                          @RequestParam String team) {
-        return ResponseEntity.ok(outpostService.drawQuestion(placeId, team));
+    @PostMapping("/leaveAttack/{placeId}")
+    public ResponseEntity<AttackStateDTO> leaveAttack(@PathVariable String placeId,
+                                                      @RequestParam String playerId) {
+        return ResponseEntity.ok(captureService.leave(placeId, playerId));
+    }
+
+    @GetMapping("/attackState/{placeId}")
+    public ResponseEntity<AttackStateDTO> attackState(@PathVariable String placeId,
+                                                      @RequestParam String playerId) {
+        return ResponseEntity.ok(captureService.getState(placeId, playerId));
     }
 
     @PostMapping("/answer/{placeId}")
     public ResponseEntity<AttackResultDTO> answerQuestion(@PathVariable String placeId,
-                                                          @RequestParam String team,
+                                                          @RequestParam String playerId,
                                                           @RequestBody Map<String, Object> body) {
         Long questionId = Long.valueOf(body.get("questionId").toString());
         int optionIndex = Integer.parseInt(body.get("optionIndex").toString());
         return ResponseEntity.ok(
-                outpostService.answerQuestion(placeId, questionId, optionIndex, team));
+                captureService.answer(placeId, playerId, questionId, optionIndex));
     }
 
     @PostMapping("/cancelAttack/{placeId}")
     public ResponseEntity<Void> cancelAttack(@PathVariable String placeId) {
-        outpostService.cancelAttack(placeId);
+        captureService.cancel(placeId);
         return ResponseEntity.noContent().build();
     }
 
@@ -70,12 +89,6 @@ public class OutpostController {
     public ResponseEntity<Void> resetAttempt(@PathVariable String placeId) {
         outpostService.resetAttempt(placeId);
         return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/conquerOutpost/{placeId}")
-    public ResponseEntity<OutpostDTO> conquerOutpost(@PathVariable String placeId,
-                                                     @RequestParam String team) {
-        return ResponseEntity.ok(outpostService.conquerOutpost(placeId, team));
     }
 
     @DeleteMapping("/deleteOutpost/{placeId}")

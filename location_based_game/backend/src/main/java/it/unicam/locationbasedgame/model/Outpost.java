@@ -19,17 +19,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.security.SecureRandom;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
 
 /**
  * Represents an Outpost that the player can select on the game map.
- * An Outpost is linked to a specific number of Topics (questions can
- * be drawn from any of them), has a required difficulty level for the
- * question that will be asked, requires a minimum number of players
- * to answer it, and sits at a named place on the map.
+ * An Outpost is linked to a specific number of Topics, it has a
+ * required difficulty level for the question that will be asked,
+ * it requires a minimum number of players to answer it, and it is
+ * located at a named place on the map.
  */
 @Entity
 @Table(name = "outposts")
@@ -48,18 +45,15 @@ public class Outpost {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * Id of the matching place in the BEE environment. */
+    /** Id of the matching place in the BEE environment. */
     @Column(nullable = false, unique = true)
     private String placeId;
 
-    /**
-     * Name of the matching place in the BEE environment. */
+    /** Name of the matching place in the BEE environment. */
     @Column(nullable = false)
     private String placeName;
 
-    /**
-     * The topics this outpost draws questions. */
+    /** The topics this outpost draws questions. */
     @ManyToMany
     @JoinTable(
             name = "outpost_topics",
@@ -108,9 +102,7 @@ public class Outpost {
     }
 
     /**
-     * Tells whether the given team is currently allowed to start a conquest
-     * of this outpost. A team can never conquer an outpost it already owns;
-     * a neutral outpost can always be conquered by either team.
+     * Says whether this outpost can be conquered by the given team.
      *
      * @param team the team attempting the conquest
      * @return true if team can start a conquest, false otherwise
@@ -145,16 +137,8 @@ public class Outpost {
     }
 
     /**
-     * Applies the outcome of a correctly answered conquest question started
-     * by the given team. Call this only after the associated question has
-     * been answered correctly.
-     * Rules:
-     * - If the outpost is neutral, it becomes the attacking team's.
-     * - If the outpost belongs to the opposing team, this first successful
-     *   conquest only strips that ownership away, turning it back to
-     *   neutral. The team must then start and win a second conquest (once
-     *   it is neutral) to actually make it theirs.
-     * - If the outpost already belongs to team, nothing changes.
+     * Applies the outcome of a correctly answered conquest
+     * question started by the given team.
      *
      * @param team the team that won the conquest question
      * @return the resulting OutpostState
@@ -171,33 +155,5 @@ public class Outpost {
             state = OutpostState.neutral;
         }
         return state;
-    }
-
-    /**
-     * All questions across topics that match this outpost's difficulty.
-     *
-     * @return the list of matching questions
-     */
-    @Transient
-    public List<Question> getMatchingQuestions() {
-        return topics.stream()
-                .flatMap(topic -> topic.questionsByDifficulty(difficulty).stream())
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Picks a random question matching this outpost's difficulty from one
-     * of its topics.
-     *
-     * @return a random matching question, or null if none match
-     */
-    @Transient
-    public Question pickRandomQuestion() {
-        List<Question> candidates = getMatchingQuestions();
-        if (candidates.isEmpty()) {
-            return null;
-        }
-        Random random = new SecureRandom();
-        return candidates.get(random.nextInt(candidates.size()));
     }
 }

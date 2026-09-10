@@ -8,8 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Data Transfer Object used to expose and receive
- * Player data through the REST API.
+ * Data Transfer Object used to expose and receive Player data.
  */
 @Getter
 @Setter
@@ -26,4 +25,8 @@ public class PlayerDTO {
     private Role role;
 
     private Team team;
+
+    private String beeParticipantId;
+
+    private Integer penaltySecondsLeft;
 }

@@ -9,14 +9,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Represents a subject containing a set of related Question entities.
@@ -38,25 +36,10 @@ public class Topic {
     @Column(nullable = false, unique = true)
     private String name;
 
-    /**
-     * The list of questions belonging to this topic.
-     */
+    /** The list of questions belonging to this topic. */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "topic_id")
     private List<Question> questions;
-
-    /**
-     * Returns all questions in this topic with the given difficulty.
-     *
-     * @param difficulty the difficulty level to filter by
-     * @return the list of matching questions
-     */
-    @Transient
-    public List<Question> questionsByDifficulty(int difficulty) {
-        return questions.stream()
-                .filter(question -> question.getDifficulty() == difficulty)
-                .collect(Collectors.toList());
-    }
 
     /**
      * Assigns question to this topic, unless it is already one of its questions.

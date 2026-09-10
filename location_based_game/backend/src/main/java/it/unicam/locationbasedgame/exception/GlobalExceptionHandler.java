@@ -25,4 +25,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleNotFound(EntityNotFoundException exception) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", exception.getMessage()));
     }
+
+    /** Returns 502 Bad Gateway when another service this backend depends on did not answer. */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, String>> handleUpstreamFailure(IllegalStateException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(Map.of("error", exception.getMessage()));
+    }
 }

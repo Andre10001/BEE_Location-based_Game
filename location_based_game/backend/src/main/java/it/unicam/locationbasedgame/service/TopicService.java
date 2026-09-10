@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,7 +52,6 @@ public class TopicService implements ITopicService {
         Topic topic = topicRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Topic not found with id " + id));
         topic.setName(topicDTO.getName());
-        topic.setQuestions(toQuestionEntities(topicDTO.getQuestions()));
         Topic saved = topicRepository.save(topic);
         return toDto(saved);
     }
@@ -97,6 +97,9 @@ public class TopicService implements ITopicService {
 
     /** Converts a list of QuestionDTO into a list of new Question entities. */
     private List<Question> toQuestionEntities(List<QuestionDTO> questionDTOs) {
+        if (questionDTOs == null) {
+            return new ArrayList<>();
+        }
         return questionDTOs.stream()
                 .map(q -> new Question(q.getId(), q.getDifficulty(), q.getText(), q.getOptions(),
                         q.getCorrectOptionIndex(), q.getExplanation()))

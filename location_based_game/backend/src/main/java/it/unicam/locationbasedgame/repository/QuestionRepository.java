@@ -10,7 +10,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     /**
      * Finds all questions matching the given difficulty level.
      *
-     * @param difficulty the difficulty level to filter by (1-5)
+     * @param difficulty the difficulty level
      * @return the list of matching questions
      */
     List<Question> findByDifficulty(int difficulty);

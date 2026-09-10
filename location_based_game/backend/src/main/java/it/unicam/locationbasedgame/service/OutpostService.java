@@ -1,40 +1,44 @@
 package it.unicam.locationbasedgame.service;
 
-import it.unicam.locationbasedgame.config.BeeClient;
-import it.unicam.locationbasedgame.dto.AttackQuestionDTO;
-import it.unicam.locationbasedgame.dto.AttackResultDTO;
-import it.unicam.locationbasedgame.dto.OutpostDTO;
-import it.unicam.locationbasedgame.enums.OutpostState;
-import it.unicam.locationbasedgame.enums.Team;
-import it.unicam.locationbasedgame.model.Outpost;
-import it.unicam.locationbasedgame.model.Question;
-import it.unicam.locationbasedgame.model.Topic;
-import it.unicam.locationbasedgame.repository.OutpostRepository;
-import it.unicam.locationbasedgame.repository.TopicRepository;
-import it.unicam.locationbasedgame.service.interfaces.IOutpostService;
-import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
+import it.unicam.locationbasedgame.config.BeeClient;
+import it.unicam.locationbasedgame.dto.OutpostDTO;
+import it.unicam.locationbasedgame.enums.OutpostState;
+import it.unicam.locationbasedgame.model.Outpost;
+import it.unicam.locationbasedgame.model.Topic;
+import it.unicam.locationbasedgame.repository.OutpostRepository;
+import it.unicam.locationbasedgame.repository.TopicRepository;
+import it.unicam.locationbasedgame.service.interfaces.ICaptureService;
+import it.unicam.locationbasedgame.service.interfaces.IOutpostService;
+import it.unicam.locationbasedgame.service.interfaces.IProcessTimerService;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implementation of IOutpostService, supported by OutpostRepository.
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class OutpostService implements IOutpostService {
+
+    private static final String OUTPOST_VIEW = "Outposts";
+
+    private static final int MIN_DIFFICULTY = 1;
+    private static final int MAX_DIFFICULTY = 5;
 
     private final OutpostRepository outpostRepository;
     private final TopicRepository topicRepository;
     private final BeeClient beeClient;
-    
-    private final Random random = new SecureRandom();
+    private final IProcessTimerService processTimerService;
+    private final ICaptureService captureService;
 
     @Override
     @Transactional
@@ -48,10 +52,8 @@ public class OutpostService implements IOutpostService {
                     return created;
                 });
 
-        outpost.setPlaceName(outpostDTO.getPlaceName().trim());
-        outpost.setDifficulty(outpostDTO.getDifficulty());
-        outpost.setRequiredPlayers(outpostDTO.getRequiredPlayers());
-        outpost.setMaxTopics(outpostDTO.getMaxTopics());
+        configure(outpost, outpostDTO.getPlaceName(), outpostDTO.getDifficulty(),
+                outpostDTO.getRequiredPlayers(), outpostDTO.getMaxTopics());
 
         List<Topic> topics = new ArrayList<>();
         for (Long topicId : outpostDTO.getTopicIds()) {
@@ -81,108 +83,6 @@ public class OutpostService implements IOutpostService {
     }
 
     @Override
-    public AttackQuestionDTO drawQuestion(String placeId, String team) {
-        Outpost outpost = outpostRepository.findByPlaceId(placeId)
-                .orElseThrow(() -> new EntityNotFoundException("No outpost on place " + placeId));
-
-        Team attackingTeam = parseTeam(team);
-        if (!outpost.canBeConqueredBy(attackingTeam)) {
-            throw new IllegalArgumentException("Your team already holds this outpost");
-        }
-
-        if (outpost.isBeingCaptured()) {
-            throw new IllegalArgumentException("Somebody is already answering for this outpost");
-        }
-
-        List<Question> candidates = new ArrayList<>();
-        List<String> topicOfCandidate = new ArrayList<>();
-        for (Topic topic : outpost.getTopics()) {
-            for (Question question : topic.getQuestions()) {
-                if (question.getDifficulty() == outpost.getDifficulty()) {
-                    candidates.add(question);
-                    topicOfCandidate.add(topic.getName());
-                }
-            }
-        }
-        if (candidates.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "No question of difficulty " + outpost.getDifficulty()
-                    + " among the topics of this outpost");
-        }
-
-        outpost.startAttempt();
-        outpostRepository.save(outpost);
-        syncToBee(outpost);
-
-        int chosen = random.nextInt(candidates.size());
-        Question question = candidates.get(chosen);
-        return new AttackQuestionDTO(question.getId(), topicOfCandidate.get(chosen),
-                question.getDifficulty(), question.getText(), question.getOptions());
-    }
-
-    @Override
-    @Transactional
-    public AttackResultDTO answerQuestion(String placeId, Long questionId, int optionIndex, String team) {
-        Outpost outpost = outpostRepository.findByPlaceId(placeId)
-                .orElseThrow(() -> new EntityNotFoundException("No outpost on place " + placeId));
-
-        Team attackingTeam = parseTeam(team);
-        if (!outpost.canBeConqueredBy(attackingTeam)) {
-            throw new IllegalArgumentException("Your team already holds this outpost");
-        }
-
-        Question question = outpost.getTopics().stream()
-                .flatMap(topic -> topic.getQuestions().stream())
-                .filter(candidate -> candidate.getId().equals(questionId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "That question does not belong to this outpost"));
-
-        boolean correct = question.isCorrect(optionIndex);
-        String message;
-
-        if (correct) {
-            OutpostState previousState = outpost.getState();
-            OutpostState newState = outpost.conquer(attackingTeam);
-            outpostRepository.save(outpost);
-
-            beeClient.updatePlaceStatus(placeId, newState.name());
-
-            message = newState == OutpostState.neutral
-                    ? "Right answer: the outpost is no longer held by the other team. "
-                      + "Win another attack to take it."
-                    : "Right answer: the outpost is yours.";
-            if (newState == previousState) {
-                message = "Right answer, but nothing changed here.";
-            }
-        } else {
-            message = "Wrong answer: the outpost stays as it is.";
-        }
-
-        outpost.endAttempt(correct);
-        outpostRepository.save(outpost);
-        syncToBee(outpost);
-
-        return new AttackResultDTO(correct, question.getCorrectOptionIndex(),
-                question.getExplanation(), outpost.getState(), message);
-    }
-
-    @Override
-    @Transactional
-    public void cancelAttack(String placeId) {
-        Outpost outpost = outpostRepository.findByPlaceId(placeId)
-                .orElseThrow(() -> new EntityNotFoundException("No outpost on place " + placeId));
- 
-        if (!outpost.isBeingCaptured()) {
-            return;
-        }
-        outpost.endAttempt(false);
-        outpostRepository.save(outpost);
-        syncToBee(outpost);
-    }
-
-
-    @Override
     @Transactional
     public void resetAttempt(String placeId) {
         Outpost outpost = outpostRepository.findByPlaceId(placeId)
@@ -197,11 +97,39 @@ public class OutpostService implements IOutpostService {
     }
 
     @Override
-    public OutpostDTO conquerOutpost(String placeId, String team) {
-        Outpost outpost = outpostRepository.findByPlaceId(placeId)
-                .orElseThrow(() -> new EntityNotFoundException("No outpost on place " + placeId));
-        outpost.conquer(Team.valueOf(team));
-        return toDto(outpostRepository.save(outpost));
+    @Transactional
+    public List<OutpostDTO> syncWithEnvironment() {
+        processTimerService.forget();
+        captureService.clear();
+
+        List<BeeClient.BeePlace> places = beeClient.getPlacesInView(OUTPOST_VIEW);
+        if (places.isEmpty()) {
+            throw new IllegalStateException(
+                    "The deployed map has no place in the " + OUTPOST_VIEW + " view");
+        }
+ 
+        int created = 0;
+        for (BeeClient.BeePlace place : places) {
+            Outpost outpost = outpostRepository.findByPlaceId(place.getId()).orElse(null);
+            if (outpost == null) {
+                outpost = new Outpost();
+                outpost.setPlaceId(place.getId());
+                outpost.setTopics(new ArrayList<>());
+                created++;
+            }
+ 
+            configure(outpost, place.getName(), place.getInt("difficulty", 1),
+                    place.getInt("requiredPlayers", 1), place.getInt("maxTopics", 1));
+            outpost.setState(parseState(place.getText("status", "neutral")));
+            outpost.endAttempt(false);
+ 
+            Outpost saved = outpostRepository.save(outpost);
+            syncToBee(saved);
+        }
+
+        log.info("[OutpostService] Synchronised " + places.size() + " place(s) from the map, " + created + " new");
+ 
+        return getAllOutposts();
     }
 
     @Override
@@ -215,7 +143,7 @@ public class OutpostService implements IOutpostService {
     private void syncToBee(Outpost outpost) {
         String placeId = outpost.getPlaceId();
         boolean captured = outpost.getState() != OutpostState.neutral;
-
+ 
         beeClient.updatePlaceAttribute(placeId, "status", outpost.getState().name());
         beeClient.updatePlaceAttribute(placeId, "isCaptured", String.valueOf(captured));
         beeClient.updatePlaceAttribute(placeId, "isBeingCaptured",
@@ -229,34 +157,56 @@ public class OutpostService implements IOutpostService {
                 String.valueOf(outpost.getMaxTopics()));
     }
 
-    /** Turns the team name sent by a client into a Team, or refuses it. */
-    private Team parseTeam(String team) {
+    /**
+     * Configures an outpost with the given data.
+     *
+     * @param outpost the outpost to configure
+     * @param placeName the display name of its place
+     * @param difficulty the difficulty of the questions it asks
+     * @param requiredPlayers how many players it takes to conquer it
+     * @param maxTopics how many topics it accepts
+     */
+    private void configure(Outpost outpost, String placeName, int difficulty,
+                           int requiredPlayers, int maxTopics) {
+        if (placeName == null || placeName.isBlank()) {
+            throw new IllegalArgumentException("placeName must not be empty");
+        }
+        if (difficulty < MIN_DIFFICULTY || difficulty > MAX_DIFFICULTY) {
+            throw new IllegalArgumentException("difficulty of " + placeName + " must be between "
+                    + MIN_DIFFICULTY + " and " + MAX_DIFFICULTY + ", not " + difficulty);
+        }
+        if (requiredPlayers < 1) {
+            throw new IllegalArgumentException(
+                    "requiredPlayers of " + placeName + " must be at least 1");
+        }
+        if (maxTopics < 1) {
+            throw new IllegalArgumentException(
+                    "maxTopics of " + placeName + " must be at least 1");
+        }
+ 
+        outpost.setPlaceName(placeName.trim());
+        outpost.setDifficulty(difficulty);
+        outpost.setRequiredPlayers(requiredPlayers);
+        outpost.setMaxTopics(maxTopics);
+    }
+
+    /** Reads a status written in the map, or sets it to neutral otherwise. */
+    private OutpostState parseState(String status) {
         try {
-            return Team.valueOf(team);
-        } catch (IllegalArgumentException | NullPointerException e) {
-            throw new IllegalArgumentException("Unknown team: " + team);
+            return OutpostState.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            log.warn("[OutpostService] Unknown status '" + status + "' in the map, using neutral");
+            return OutpostState.neutral;
         }
     }
 
-    /** Checks what was sent before anything is written. */
+    /** Checks the input data before saving an outpost. */
     private void validate(String placeId, OutpostDTO dto) {
         if (placeId == null || placeId.isBlank()) {
             throw new IllegalArgumentException("placeId must not be empty");
         }
         if (dto == null || dto.getTopicIds() == null) {
             throw new IllegalArgumentException("topicIds must not be null");
-        }
-        if (dto.getPlaceName() == null || dto.getPlaceName().isBlank()) {
-            throw new IllegalArgumentException("placeName must not be empty");
-        }
-        if (dto.getDifficulty() < 1 || dto.getDifficulty() > 5) {
-            throw new IllegalArgumentException("difficulty must be between 1 and 5");
-        }
-        if (dto.getRequiredPlayers() < 1) {
-            throw new IllegalArgumentException("requiredPlayers must be at least 1");
-        }
-        if (dto.getMaxTopics() < 1) {
-            throw new IllegalArgumentException("maxTopics must be at least 1");
         }
         if (dto.getTopicIds().size() > dto.getMaxTopics()) {
             throw new IllegalArgumentException(

@@ -8,8 +8,7 @@ import lombok.Setter;
 import java.util.List;
 
 /**
- * Data Transfer Object used to expose and receive
- * Question data through the REST API.
+ * Data Transfer Object used to expose and receive Question data.
  */
 @Getter
 @Setter
