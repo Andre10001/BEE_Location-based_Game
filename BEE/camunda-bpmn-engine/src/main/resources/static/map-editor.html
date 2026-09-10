@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Map Editor</title>
+
+  <link rel="stylesheet" href="/bpenv-modeler/style.css" />
+
+  <style>
+    body { margin: 0; font-family: "Segoe UI", Tahoma, sans-serif; color: #13213a; }
+    .bar {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+      padding: 10px 12px; border-bottom: 1px solid #d6deeb; background: #f4f7fb;
+    }
+    .bar input, .bar select, .bar button { padding: 7px 10px; font-size: 14px; }
+    .bar button { cursor: pointer; }
+    #status { margin-left: auto; font-size: 14px; }
+    #status.ok { color: #0a7f3f; }
+    #status.err { color: #b42318; }
+    #bpenv-container { height: calc(100vh - 56px); }
+  </style>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@19.1.1",
+      "react/jsx-runtime": "https://esm.sh/react@19.1.1/jsx-runtime",
+      "react-dom": "https://esm.sh/react-dom@19.1.1?external=react",
+      "react-dom/client": "https://esm.sh/react-dom@19.1.1/client?external=react"
+    }
+  }
+  </script>
+
+  <script>
+    window.process = { env: { NODE_ENV: 'production' } };
+  </script>
+</head>
+
+<body>
+  <div class="bar">
+    <label for="mapName">Map name</label>
+    <input id="mapName" type="text" placeholder="my-map" />
+
+    <label for="existingMaps">Open</label>
+    <select id="existingMaps"><option value="">-- existing maps --</option></select>
+    <button id="loadButton" type="button">Load</button>
+
+    <button id="saveButton" type="button">Save map</button>
+    <button id="deployButton" type="button">Deploy map</button>
+    <span id="status"></span>
+  </div>
+
+  <div id="bpenv-container"></div>
+
+  <script type="module">
+    import bpenvModeler from '/bpenv-modeler/bpenv-modeler.js';
+
+    const MAPS_API = '/api/environment/maps';
+
+    const nameInput = document.getElementById('mapName');
+    const mapSelect = document.getElementById('existingMaps');
+    const statusLabel = document.getElementById('status');
+
+    /** Shows a short message on the right of the bar. */
+    function showStatus(message, isError) {
+      statusLabel.textContent = message;
+      statusLabel.className = isError ? 'err' : 'ok';
+    }
+
+    bpenvModeler.render('bpenv-container');
+    bpenvModeler.setEditable(true);
+
+    /** Fills the dropdown with the maps already saved in the envs folder. */
+    async function loadMapList() {
+      try {
+        const response = await fetch(MAPS_API);
+        const body = await response.json();
+        if (!body.success) throw new Error(body.message);
+        for (const name of body.data) {
+          const option = document.createElement('option');
+          option.value = name;
+          option.textContent = name;
+          mapSelect.appendChild(option);
+        }
+      } catch (error) {
+        showStatus('Could not load the map list: ' + error.message, true);
+      }
+    }
+
+    /** Opens the chosen map inside the editor. */
+    async function loadSelectedMap() {
+      const name = mapSelect.value;
+      if (!name) {
+        showStatus('Choose a map first', true);
+        return;
+      }
+      try {
+        const response = await fetch(`${MAPS_API}/${name}`);
+        const body = await response.json();
+        if (!body.success) throw new Error(body.message);
+        bpenvModeler.setModel({
+          physicalPlaces: body.data.physicalPlaces ?? [],
+          edges: body.data.edges ?? [],
+          logicalPlaces: body.data.logicalPlaces ?? [],
+          views: body.data.views ?? [],
+        });
+        nameInput.value = name;
+        showStatus(`Map "${name}" loaded`, false);
+      } catch (error) {
+        showStatus('Could not load the map: ' + error.message, true);
+      }
+    }
+
+    /** Saves what is currently drawn to the engine. */
+    async function saveMap() {
+      const name = nameInput.value.trim();
+      if (!name) {
+        showStatus('Type a name for the map', true);
+        return;
+      }
+      const model = bpenvModeler.getModel();
+      if (!model.physicalPlaces || model.physicalPlaces.length === 0) {
+        showStatus('Draw at least one place before saving', true);
+        return;
+      }
+      try {
+        const response = await fetch(`${MAPS_API}/${name}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(model),
+        });
+        const body = await response.json();
+        if (!body.success) throw new Error(body.message);
+        showStatus(body.data, false);
+      } catch (error) {
+        showStatus('Could not save the map: ' + error.message, true);
+      }
+    }
+
+    /** Deploys the map currently named in the box. */
+    async function deployMap() {
+      const name = nameInput.value.trim();
+      if (!name) {
+        showStatus('Type the name of a saved map', true);
+        return;
+      }
+      try {
+        const response = await fetch(`${MAPS_API}/${name}/deploy`, { method: 'POST' });
+        const body = await response.json();
+        if (!body.success) throw new Error(body.message);
+        showStatus(body.data, false);
+        window.open('/environment.html', '_blank');
+      } catch (error) {
+        showStatus('Could not deploy the map: ' + error.message, true);
+      }
+    }
+
+    document.getElementById('deployButton').addEventListener('click', deployMap);
+    document.getElementById('loadButton').addEventListener('click', loadSelectedMap);
+    document.getElementById('saveButton').addEventListener('click', saveMap);
+
+    loadMapList();
+  </script>
+</body>
+</html>

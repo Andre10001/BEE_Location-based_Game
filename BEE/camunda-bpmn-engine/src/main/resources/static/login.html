@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign in</title>
+  <style>
+    body {
+      margin: 0; font-family: "Segoe UI", Tahoma, sans-serif; color: #13213a;
+      background: #eef2f8; display: flex; min-height: 100vh;
+      align-items: center; justify-content: center;
+    }
+    .sheet {
+      background: #fff; border: 1px solid #c3cfe3; border-radius: 10px;
+      padding: 28px 24px; width: min(380px, 92vw);
+      box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    p.lead { color: #55637d; margin: 0 0 20px; font-size: 14px; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 13px; color: #55637d; margin-bottom: 4px; }
+    .field input {
+      width: 100%; padding: 10px 12px; font-size: 15px; box-sizing: border-box;
+      border: 1px solid #c3cfe3; border-radius: 6px;
+    }
+    button {
+      font-family: inherit; font-size: 15px; cursor: pointer; width: 100%;
+      padding: 11px 14px; border-radius: 6px;
+      border: 1px solid #2f6fd0; background: #2f6fd0; color: #fff;
+    }
+    button:disabled { opacity: .6; cursor: default; }
+    .error { color: #b42318; font-size: 14px; margin-top: 12px; min-height: 20px; }
+    .alt { margin-top: 18px; font-size: 14px; text-align: center; color: #55637d; }
+    .alt a { color: #2f6fd0; }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <h1>Sign in</h1>
+    <p class="lead">Type your nickname and password.</p>
+
+    <div class="field">
+      <label for="nickname">Nickname</label>
+      <input id="nickname" type="text" autocomplete="username" />
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" />
+    </div>
+
+    <button id="loginButton">Sign in</button>
+    <div class="error" id="error"></div>
+
+    <div class="alt">No account yet? <a href="register.html">Sign up</a></div>
+  </div>
+
+  <script>
+    const GAME_API = 'http://localhost:8080';
+
+    const errorBox = document.getElementById('error');
+    const button = document.getElementById('loginButton');
+
+    /** Keeps the signed-in player for the other pages of the game. */
+    function remember(player) {
+      sessionStorage.setItem('player', JSON.stringify(player));
+    }
+
+    async function signIn() {
+      const nickname = document.getElementById('nickname').value.trim();
+      const password = document.getElementById('password').value;
+      errorBox.textContent = '';
+
+      if (!nickname || !password) {
+        errorBox.textContent = 'Type both your nickname and your password.';
+        return;
+      }
+
+      button.disabled = true;
+      try {
+        const response = await fetch(`${GAME_API}/api/players/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nickname, password }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Wrong nickname or password.');
+        }
+
+        remember(await response.json());
+        location.replace('lobby.html');
+      } catch (error) {
+        errorBox.textContent = error.message;
+        button.disabled = false;
+      }
+    }
+
+    button.addEventListener('click', signIn);
+    for (const field of ['nickname', 'password']) {
+      document.getElementById(field).addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') signIn();
+      });
+    }
+
+    (async () => {
+      const fromApp = new URLSearchParams(location.hash.slice(1)).get('playerId');
+      if (fromApp) {
+        history.replaceState(null, '', location.pathname);
+        try {
+          const response = await fetch(
+            `${GAME_API}/api/players/getPlayerById/${encodeURIComponent(fromApp)}`,
+            { cache: 'no-store' });
+          if (!response.ok) throw new Error('unknown player');
+          remember(await response.json());
+          location.replace('lobby.html');
+          return;
+        } catch (error) {
+          errorBox.textContent = 'That link did not work. Sign in below.';
+        }
+      }
+
+      if (sessionStorage.getItem('player')) {
+        location.replace('lobby.html');
+      }
+    })();
+  </script>
+</body>
+</html>

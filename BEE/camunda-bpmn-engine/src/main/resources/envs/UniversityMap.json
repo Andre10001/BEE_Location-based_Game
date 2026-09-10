@@ -8,7 +8,7 @@
       "status" : "neutral",
       "isBeingCaptured" : "false",
       "difficulty" : "1",
-      "requiredPlayers" : "1",
+      "requiredPlayers" : "2",
       "maxTopics" : "3",
       "type" : "outpost",
       "lastAttempt" : "pending"
@@ -99,7 +99,7 @@
       "isBeingCaptured" : "false",
       "difficulty" : "1",
       "maxTopics" : "3",
-      "requiredPlayers" : "1",
+      "requiredPlayers" : "2",
       "type" : "outpost",
       "lastAttempt" : "pending"
     }

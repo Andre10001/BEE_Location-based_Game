@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create an account</title>
+  <style>
+    body {
+      margin: 0; font-family: "Segoe UI", Tahoma, sans-serif; color: #13213a;
+      background: #eef2f8; display: flex; min-height: 100vh;
+      align-items: center; justify-content: center;
+    }
+    .sheet {
+      background: #fff; border: 1px solid #c3cfe3; border-radius: 10px;
+      padding: 28px 24px; width: min(380px, 92vw);
+      box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    p.lead { color: #55637d; margin: 0 0 20px; font-size: 14px; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 13px; color: #55637d; margin-bottom: 4px; }
+    .field input {
+      width: 100%; padding: 10px 12px; font-size: 15px; box-sizing: border-box;
+      border: 1px solid #c3cfe3; border-radius: 6px;
+    }
+    button {
+      font-family: inherit; font-size: 15px; cursor: pointer; width: 100%;
+      padding: 11px 14px; border-radius: 6px;
+      border: 1px solid #2f6fd0; background: #2f6fd0; color: #fff;
+    }
+    button:disabled { opacity: .6; cursor: default; }
+    .error { color: #b42318; font-size: 14px; margin-top: 12px; min-height: 20px; }
+    .alt { margin-top: 18px; font-size: 14px; text-align: center; color: #55637d; }
+    .alt a { color: #2f6fd0; }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <h1>Create an account</h1>
+    <p class="lead">Pick a nickname the other players will see.</p>
+
+    <div class="field">
+      <label for="nickname">Nickname</label>
+      <input id="nickname" type="text" autocomplete="username" />
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="new-password" />
+    </div>
+    <div class="field">
+      <label for="confirm">Repeat the password</label>
+      <input id="confirm" type="password" autocomplete="new-password" />
+    </div>
+
+    <button id="registerButton">Create the account</button>
+    <div class="error" id="error"></div>
+
+    <div class="alt">Already have one? <a href="login.html">Sign in</a></div>
+  </div>
+
+  <script>
+    const GAME_API = 'http://localhost:8080';
+
+    const errorBox = document.getElementById('error');
+    const button = document.getElementById('registerButton');
+
+    async function register() {
+      const nickname = document.getElementById('nickname').value.trim();
+      const password = document.getElementById('password').value;
+      const confirm = document.getElementById('confirm').value;
+      errorBox.textContent = '';
+
+      if (!nickname || !password) {
+        errorBox.textContent = 'Fill in every field.';
+        return;
+      }
+      if (password !== confirm) {
+        errorBox.textContent = 'The two passwords are not the same.';
+        return;
+      }
+
+      button.disabled = true;
+      try {
+        const response = await fetch(`${GAME_API}/api/players/createPlayer`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nickname, password }),
+        });
+
+        if (!response.ok) {
+          const body = await response.json().catch(() => null);
+          throw new Error(body && body.error ? body.error : 'Could not create the account.');
+        }
+
+        sessionStorage.setItem('player', JSON.stringify(await response.json()));
+        location.replace('lobby.html');
+      } catch (error) {
+        errorBox.textContent = error.message;
+        button.disabled = false;
+      }
+    }
+
+    button.addEventListener('click', register);
+    for (const field of ['nickname', 'password', 'confirm']) {
+      document.getElementById(field).addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') register();
+      });
+    }
+  </script>
+</body>
+</html>

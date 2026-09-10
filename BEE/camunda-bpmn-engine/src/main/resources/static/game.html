@@ -1,0 +1,1011 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Location based game</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    body { margin: 0; font-family: "Segoe UI", Tahoma, sans-serif; color: #13213a; }
+    #map { height: 100vh; width: 100%; }
+
+    .topbar {
+      position: absolute; top: 10px; left: 10px; z-index: 500;
+      background: #fff; border: 1px solid #c3cfe3; border-radius: 6px;
+      padding: 8px 12px; display: flex; gap: 10px; align-items: center;
+      font-size: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.15);
+      flex-wrap: wrap; max-width: calc(100vw - 190px);
+    }
+    .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
+    .sw-neutral { background: #9aa5b6; }
+    .sw-team1 { background: #2f6fd0; }
+    .sw-team2 { background: #d03b3b; }
+    .sw-me { background: #7b3fb5; }
+
+    .badge {
+      padding: 2px 8px; border-radius: 10px; font-size: 13px;
+      background: #eef2f8; border: 1px solid #c3cfe3;
+    }
+    .badge.team1 { background: #e8effa; border-color: #2f6fd0; color: #1d4a8f; }
+    .badge.team2 { background: #fbeaea; border-color: #d03b3b; color: #8f2222; }
+    .where { color: #55637d; font-size: 13px; }
+    .where.stale { color: #b42318; }
+
+    .clock {
+      position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+      z-index: 500; background: #fff; border: 1px solid #c3cfe3;
+      border-radius: 6px; padding: 6px 18px; text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,.15);
+    }
+    .clock-title { font-size: 11px; color: #55637d; text-transform: uppercase; }
+    .clock-time {
+      font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums;
+    }
+    .clock.ending .clock-time { color: #b42318; }
+    .clock-score { font-size: 12px; color: #55637d; }
+
+    .final {
+      position: fixed; inset: 0; z-index: 1200;
+      background: rgba(12, 20, 36, .75);
+      display: none; align-items: center; justify-content: center;
+    }
+    .final.open { display: flex; }
+    .final-card {
+      background: #fff; border-radius: 10px; padding: 28px 24px; text-align: center;
+      width: min(420px, 92vw); border-top: 8px solid #9aa5b6;
+    }
+    .final-card.team1 { border-top-color: #2f6fd0; }
+    .final-card.team2 { border-top-color: #d03b3b; }
+    .final-card h2 { margin: 0 0 6px; font-size: 24px; }
+    .final-card.team1 h2 { color: #1d4a8f; }
+    .final-card.team2 h2 { color: #8f2222; }
+    .final-score { margin-bottom: 20px; }
+    .final-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 8px 12px; margin-bottom: 6px; border-radius: 6px;
+      font-size: 16px; border: 1px solid #c3cfe3; background: #f7f9fc;
+    }
+    .final-row span:last-child { font-size: 22px; font-weight: 600; }
+    .final-row.team1 { border-color: #2f6fd0; background: #f6f9fe; color: #1d4a8f; }
+    .final-row.team2 { border-color: #d03b3b; background: #fef7f7; color: #8f2222; }
+    .final-note { font-size: 12px; color: #55637d; text-align: center; margin-top: 4px; }
+
+    .penalty {
+      position: absolute; top: 10px; right: 10px; z-index: 500;
+      background: #fff7e6; border: 1px solid #e8b31f; border-radius: 6px;
+      padding: 8px 14px; text-align: center; display: none;
+      box-shadow: 0 1px 4px rgba(0,0,0,.15);
+    }
+    .penalty.on { display: block; }
+    .penalty-title { font-size: 12px; color: #8a6608; text-transform: uppercase; }
+    .penalty-clock {
+      font-size: 24px; font-weight: 600; color: #8a6608;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(12, 20, 36, .55);
+      display: none; align-items: center; justify-content: center;
+    }
+    .overlay.open { display: flex; }
+
+    .card {
+      background: #fff; border-radius: 10px; padding: 20px;
+      width: min(520px, 92vw); max-height: 88vh; overflow-y: auto;
+      border-top: 7px solid #9aa5b6;
+    }
+    .card.state-neutral { border-top-color: #9aa5b6; background: #fbfcfd; }
+    .card.state-team1 { border-top-color: #2f6fd0; background: #f6f9fe; }
+    .card.state-team2 { border-top-color: #d03b3b; background: #fef7f7; }
+    .card.state-underAttack { border-top-color: #e8b31f; background: #fffaef; }
+    .card h2 { margin: 0 0 4px; font-size: 19px; }
+    .card.state-neutral h2 { color: #5c6779; }
+    .card.state-team1 h2 { color: #1d4a8f; }
+    .card.state-team2 h2 { color: #8f2222; }
+    .card.state-underAttack h2 { color: #8a6608; }
+
+    .meta { color: #55637d; font-size: 13px; margin-bottom: 14px; }
+    .question { font-size: 16px; margin-bottom: 14px; }
+    .option {
+      display: block; width: 100%; text-align: left; margin-bottom: 8px;
+      padding: 10px 12px; font-size: 15px; font-family: inherit; cursor: pointer;
+      border: 1px solid #c3cfe3; border-radius: 6px; background: #f7f9fc;
+    }
+    .option:hover:not(:disabled) { background: #e8edf6; }
+    .option:disabled { cursor: default; opacity: .8; }
+    .option.right { border-color: #0a7f3f; background: #e6f5ec; }
+    .option.wrong { border-color: #b42318; background: #fdecea; }
+    .result { margin-top: 6px; font-size: 15px; }
+    .answer-clock {
+      float: right; font-size: 18px; font-weight: 600;
+      font-variant-numeric: tabular-nums; color: #55637d;
+    }
+    .answer-clock.ending { color: #b42318; }
+
+    .verdict { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+    .review-question { font-size: 15px; margin: 12px 0 8px; }
+    .review-option {
+      display: flex; align-items: baseline; justify-content: space-between;
+      gap: 12px; padding: 7px 10px; margin-bottom: 6px; font-size: 14px;
+      border: 1px solid #c3cfe3; border-radius: 6px; background: #f7f9fc;
+    }
+    .review-option.right { border-color: #0a7f3f; background: #e6f5ec; }
+    .review-option.wrong { border-color: #b42318; background: #fdecea; }
+    .tag {
+      font-size: 11px; color: #55637d; text-transform: uppercase;
+      letter-spacing: .04em; white-space: nowrap;
+    }
+    .verdict.right { color: #0a7f3f; }
+    .verdict.wrong { color: #b42318; }
+    .pending {
+      margin-top: 16px; padding: 10px 12px; border-radius: 6px;
+      background: #fff7e6; border: 1px solid #e8b31f; color: #8a6608;
+      font-size: 14px; text-align: center;
+    }
+    .penalty-note {
+      margin-top: 8px; padding: 10px 12px; border-radius: 6px;
+      background: #fdecea; border: 1px solid #b42318; color: #8f2222;
+      font-size: 14px; text-align: center;
+    }
+    .settled {
+      margin-top: 16px; padding: 10px 12px; border-radius: 6px;
+      background: #eef2f8; border: 1px solid #c3cfe3; font-size: 14px;
+    }
+    .explanation { margin-top: 8px; color: #55637d; font-size: 14px; }
+    .facts { margin: 12px 0 16px; font-size: 14px; }
+    .facts div { margin-bottom: 4px; }
+    .facts .label { color: #55637d; }
+    .attack {
+      width: 100%; padding: 11px 14px; font-size: 16px; font-family: inherit;
+      cursor: pointer; border: none; border-radius: 6px;
+      background: #2f6fd0; color: #fff; font-variant-numeric: tabular-nums;
+    }
+    .attack:disabled { background: #c3cfe3; color: #6b7789; cursor: default; }
+    .close {
+      margin-top: 16px; width: 100%; padding: 9px 14px; font-family: inherit;
+      font-size: 15px; cursor: pointer;
+      border: 1px solid #c3cfe3; border-radius: 6px; background: #fff;
+    }
+    .why { margin-top: 8px; font-size: 13px; color: #55637d; text-align: center; }
+    .error { color: #b42318; }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <strong id="meLabel"></strong>
+    <span class="badge" id="teamBadge">-</span>
+    <span class="where" id="whereLabel">position: unknown</span>
+    <span class="where" id="taskLabel">task: unknown</span>
+    <span class="where" id="statusLabel"></span>
+    <span><span class="swatch sw-neutral"></span> neutral</span>
+    <span><span class="swatch sw-team1"></span> team 1</span>
+    <span><span class="swatch sw-team2"></span> team 2</span>
+    <span><span class="swatch sw-me"></span> you</span>
+  </div>
+
+  <div class="clock" id="clockBox" style="display:none;">
+    <div class="clock-title">Time left</div>
+    <div class="clock-time" id="clockTime">--:--</div>
+    <div class="clock-score" id="clockScore"></div>
+  </div>
+
+  <div class="penalty" id="penaltyBox">
+    <div class="penalty-title">Penalty</div>
+    <div class="penalty-clock" id="penaltyClock">0:00</div>
+  </div>
+
+  <div id="map"></div>
+
+  <div class="overlay" id="overlay">
+    <div class="card" id="card"></div>
+  </div>
+
+  <div class="final" id="finalOverlay">
+    <div class="final-card" id="finalCard">
+      <h2 id="finalTitle"></h2>
+      <div class="final-score">
+        <div class="final-row team1">
+          <span>Team 1</span><span id="finalTeam1">0</span>
+        </div>
+        <div class="final-row team2">
+          <span>Team 2</span><span id="finalTeam2">0</span>
+        </div>
+        <div class="final-note">outposts held when the time ran out</div>
+      </div>
+      <button class="close" id="backToLobby" disabled>Back to the lobby</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const GAME_API = 'http://localhost:8080';
+
+    const PLACES_API = '/api/environment/pp';
+    const VIEW_API = '/api/environment/maps/views';
+    const LOGICAL_PLACE_API = '/api/environment/maps/logical-places';
+    const PARTICIPANTS_API = '/api/environment/participants';
+
+    const OUTPOST_VIEW = 'Outposts';
+    const UNDER_ATTACK_LP = 'IsUnderAttack';
+
+    const REFRESH_MS = 2000;
+    const RESULT_LOCK_MS = 5000;
+    const MATCH_LOCK_MS = 5000;
+    const FIXED_ZOOM = 18;
+    const AREA_PADDING = 0.3;
+
+    const COLOURS = {
+      neutral: '#9aa5b6',
+      team1: '#2f6fd0',
+      team2: '#d03b3b',
+      underAttack: '#e8b31f',
+      me: '#7b3fb5',
+    };
+
+    const OWNER_LABEL = {
+      neutral: 'nobody (neutral)',
+      team1: 'Team 1',
+      team2: 'Team 2',
+    };
+
+    // ----- PLAYERS -----
+
+    let me = JSON.parse(sessionStorage.getItem('player') || 'null');
+    if (!me) {
+      location.replace('login.html');
+    } else if (!me.team || !me.beeParticipantId) {
+      location.replace('lobby.html');
+    }
+
+    function remember(player) {
+      me = player;
+      sessionStorage.setItem('player', JSON.stringify(player));
+    }
+
+    async function getJson(url) {
+      const response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) throw new Error(url + ' answered ' + response.status);
+      return response.json();
+    }
+
+    async function getBeeData(url) {
+      const body = await getJson(url);
+      if (!body.success) throw new Error(body.message || 'BEE refused ' + url);
+      return body.data;
+    }
+
+    async function problemOf(response) {
+      const body = await response.json().catch(() => null);
+      if (body && body.error) return body.error;
+      return 'status ' + response.status;
+    }
+
+    // ----- MAP -----
+
+    const map = L.map('map', {
+      zoomControl: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      touchZoom: false,
+      boxZoom: false,
+      keyboard: false,
+      maxBoundsViscosity: 1.0,
+    }).setView([43.139, 13.067], FIXED_ZOOM);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 22,
+      maxNativeZoom: 19,
+    }).addTo(map);
+
+    const polygonsByPlaceId = new Map();
+    const allPlacesById = new Map();
+    const allPlacesByName = new Map();
+
+    let outpostPlaceIds = [];
+    let outpostsByPlaceId = new Map();
+    let underAttackIds = [];
+    let pendingActions = [];
+    let myPlaceId = null;
+    let myMarker = null;
+    let viewFitted = false;
+
+    let openView = null;
+    let myAnswer = null;
+    let myQuestion = null;
+    let resultUnlocksAt = null;
+    let resultFinal = false;
+    let resultOutcome = '';
+    let lobbyUnlocksAt = null;
+    let answerLeft = 0;
+    let penaltyLeft = 0;
+    let matchLeft = 0;
+    let matchSeen = false;
+    let matchOver = false;
+    let attackState = null;
+
+    const whereLabel = document.getElementById('whereLabel');
+    const taskLabel = document.getElementById('taskLabel');
+    const statusLabel = document.getElementById('statusLabel');
+    const teamBadge = document.getElementById('teamBadge');
+    const overlay = document.getElementById('overlay');
+    const card = document.getElementById('card');
+    const penaltyBox = document.getElementById('penaltyBox');
+    const penaltyClock = document.getElementById('penaltyClock');
+    const clockBox = document.getElementById('clockBox');
+    const clockTime = document.getElementById('clockTime');
+    const clockScore = document.getElementById('clockScore');
+
+    function styleFor(state, underAttack) {
+      const colour = underAttack ? COLOURS.underAttack : (COLOURS[state] || COLOURS.neutral);
+      return {
+        color: colour,
+        weight: underAttack ? 3 : 2,
+        fillColor: colour,
+        fillOpacity: 0.35,
+        dashArray: underAttack ? '6 4' : null,
+      };
+    }
+
+    /** The movement the token is still on, if any. */
+    function movementInProgress() {
+      return pendingActions.find((action) => action.action === 'move') || null;
+    }
+
+    // ----- MATCH SETTINGS -----
+
+    /** Checks what is changed and redraws whatever is moved. */
+    async function refresh() {
+      const who = encodeURIComponent(me.beeParticipantId);
+
+      let places;
+      let viewPlaceIds;
+      let attackedIds;
+      let position = null;
+      let actions = [];
+
+      try {
+        [places, viewPlaceIds, attackedIds, position, actions] = await Promise.all([
+          getBeeData(PLACES_API),
+          getBeeData(`${VIEW_API}/${OUTPOST_VIEW}/places`),
+          getBeeData(`${LOGICAL_PLACE_API}/${UNDER_ATTACK_LP}/places`),
+          getBeeData(`${PARTICIPANTS_API}/${who}/position`),
+          getBeeData(`${PARTICIPANTS_API}/${who}/actions/pending`),
+        ]);
+      } catch (error) {
+        setStatus('BEE unreachable: ' + error.message, true);
+        return;
+      }
+
+      let outposts = null;
+      try {
+        const [loadedOutposts, mine, match] = await Promise.all([
+          getJson(`${GAME_API}/api/outposts/getAllOutposts`),
+          getJson(`${GAME_API}/api/players/getPlayerById/${me.id}`),
+          getJson(`${GAME_API}/api/match/state?playerId=${encodeURIComponent(me.id)}`),
+        ]);
+        outposts = loadedOutposts;
+        if (!matchOver) remember(mine);
+        penaltyLeft = mine.penaltySecondsLeft || 0;
+        showPenalty();
+        showMatch(match);
+        setStatus('');
+      } catch (error) {
+        setStatus('game backend unreachable', true);
+      }
+
+      outpostPlaceIds = viewPlaceIds || [];
+      underAttackIds = attackedIds || [];
+      pendingActions = actions || [];
+
+      indexPlaces(places || []);
+      if (outposts) {
+        outpostsByPlaceId = new Map();
+        for (const outpost of outposts) outpostsByPlaceId.set(outpost.placeId, outpost);
+      }
+
+      syncPosition(position);
+      await syncAttack();
+      syncPolygons();
+      syncMarker();
+      syncTaskLabel();
+      syncOpenCard();
+    }
+
+    function setStatus(message, isProblem) {
+      statusLabel.textContent = message;
+      statusLabel.className = isProblem ? 'where stale' : 'where';
+    }
+
+    function indexPlaces(places) {
+      allPlacesById.clear();
+      allPlacesByName.clear();
+      for (const place of places) {
+        const coordinates = Array.isArray(place.coordinates) ? place.coordinates : [];
+        if (coordinates.length < 3) continue;
+        allPlacesById.set(place.id, place);
+        if (place.name) allPlacesByName.set(place.name, place);
+      }
+    }
+
+    /** Determine the position of my game piece. */
+    function syncPosition(raw) {
+      const text = raw ? String(raw) : null;
+      const place = text ? (allPlacesById.get(text) || allPlacesByName.get(text)) : null;
+      myPlaceId = place ? place.id : null;
+
+      if (place) {
+        whereLabel.textContent = 'position: ' + (place.name || place.id);
+      } else {
+        whereLabel.textContent = text
+          ? 'position: ' + text + ' (not on this map)'
+          : 'position: nowhere yet';
+      }
+    }
+
+    /** Syncs the polygons so the map matches the environment. */
+    function syncPolygons() {
+      for (const [placeId, polygon] of [...polygonsByPlaceId]) {
+        if (!outpostPlaceIds.includes(placeId) || !allPlacesById.has(placeId)) {
+          map.removeLayer(polygon);
+          polygonsByPlaceId.delete(placeId);
+        }
+      }
+
+      const bounds = [];
+      for (const placeId of outpostPlaceIds) {
+        const place = allPlacesById.get(placeId);
+        if (!place) continue;
+
+        const latLngs = place.coordinates.map((point) => [point[1], point[0]]);
+        bounds.push(...latLngs);
+
+        const outpost = outpostsByPlaceId.get(placeId);
+        const state = outpost ? outpost.state : 'neutral';
+        const style = styleFor(state, underAttackIds.includes(placeId));
+
+        let polygon = polygonsByPlaceId.get(placeId);
+        if (!polygon) {
+          polygon = L.polygon(latLngs, style).addTo(map);
+          polygon.bindTooltip(place.name || place.id);
+          polygon.on('click', () => openOutpost(placeId));
+          polygonsByPlaceId.set(placeId, polygon);
+        } else {
+          polygon.setLatLngs(latLngs);
+          polygon.setStyle(style);
+        }
+      }
+
+      if (!viewFitted && bounds.length > 0) {
+        const playArea = L.latLngBounds(bounds).pad(AREA_PADDING);
+        map.setView(playArea.getCenter(), FIXED_ZOOM);
+        map.setMaxBounds(playArea);
+        viewFitted = true;
+      }
+    }
+
+    function centreOf(latLngs) {
+      let latitude = 0;
+      let longitude = 0;
+      for (const point of latLngs) {
+        latitude += point[0];
+        longitude += point[1];
+      }
+      return [latitude / latLngs.length, longitude / latLngs.length];
+    }
+
+    /** Syncs the marker so it matches the position of the game piece. */
+    function syncMarker() {
+      const place = myPlaceId ? allPlacesById.get(myPlaceId) : null;
+
+      if (!place) {
+        if (myMarker) {
+          map.removeLayer(myMarker);
+          myMarker = null;
+        }
+        return;
+      }
+
+      const centre = centreOf(place.coordinates.map((point) => [point[1], point[0]]));
+      if (!myMarker) {
+        myMarker = L.circleMarker(centre, {
+          radius: 9,
+          color: COLOURS.me,
+          fillColor: COLOURS.me,
+          fillOpacity: 0.9,
+          weight: 2,
+        }).addTo(map);
+        myMarker.bindTooltip(me.nickname);
+      } else {
+        myMarker.setLatLng(centre);
+      }
+    }
+
+    /** Says what the process is waiting for from this player. */
+    function syncTaskLabel() {
+      const movement = movementInProgress();
+      if (movement) {
+        taskLabel.textContent = 'task: ' + movement.message;
+      } else if (pendingActions.length > 0) {
+        taskLabel.textContent = 'task: ' + pendingActions[0].message;
+      } else {
+        taskLabel.textContent = 'task: none';
+      }
+    }
+
+    /** Closes the match, then goes back to the lobby. */
+    function backToLobby() {
+      location.replace('lobby.html');
+    }
+
+    /** Shows who won and stops the game from being played any further. */
+    function showResult(match) {
+      const card = document.getElementById('finalCard');
+      const title = document.getElementById('finalTitle');
+
+      if (match.winner === 'draw') {
+        card.className = 'final-card';
+        title.textContent = 'A draw';
+      } else {
+        card.className = 'final-card ' + match.winner;
+        title.textContent = (OWNER_LABEL[match.winner] || match.winner) + ' wins';
+      }
+
+      document.getElementById('finalTeam1').textContent = match.team1Outposts;
+      document.getElementById('finalTeam2').textContent = match.team2Outposts;
+
+      overlay.classList.remove('open');
+      openView = null;
+      document.getElementById('finalOverlay').classList.add('open');
+
+      lobbyUnlocksAt = Date.now() + MATCH_LOCK_MS;
+      paintLobbyButton();
+
+      fetch(`${GAME_API}/api/match/end`, { method: 'POST' })
+        .catch((error) => console.warn('Could not close the match:', error.message));
+    }
+
+    /** Shows the lobby button once the report has been on screen. */
+    function paintLobbyButton() {
+      const button = document.getElementById('backToLobby');
+      const left = lobbyUnlocksAt
+        ? Math.max(Math.ceil((lobbyUnlocksAt - Date.now()) / 1000), 0) : 0;
+
+      button.disabled = left > 0;
+      button.textContent = left > 0
+        ? `Back to the lobby (${left})` : 'Back to the lobby';
+    }
+
+    // ----- MATCH CLOCK -----
+
+    /** Draws the clock and the result. */
+    function showMatch(match) {
+      clockScore.textContent = 'Team 1: ' + match.team1Outposts
+        + ' \u00b7 Team 2: ' + match.team2Outposts;
+
+      if (match.running) {
+        matchSeen = true;
+        clockBox.style.display = 'block';
+        matchLeft = match.secondsLeft;
+        paintMatchClock();
+        return;
+      }
+
+      if (matchSeen && !matchOver) {
+        matchOver = true;
+        matchLeft = 0;
+        clockBox.style.display = 'block';
+        paintMatchClock();
+        showResult(match);
+        return;
+      }
+
+      if (match.started) {
+        clockBox.style.display = 'block';
+        matchLeft = 0;
+        clockTime.textContent = '--:--';
+        clockTime.title = 'The process has no running game time timer for your pool';
+        clockBox.classList.remove('ending');
+        return;
+      }
+
+      clockBox.style.display = 'none';
+      matchLeft = 0;
+    }
+
+    /** Writes the time left onto the clock. */
+    function paintMatchClock() {
+      clockTime.textContent = asClock(matchLeft);
+      clockTime.title = '';
+      clockBox.classList.toggle('ending', matchLeft > 0 && matchLeft <= 60);
+    }
+
+    // ----- PENALTY CLOCK -----
+
+    /** Writes the seconds left onto the question card, if one is open. */
+    function paintAnswerClock() {
+      const clock = document.getElementById('answerClock');
+      if (!clock) return;
+      clock.textContent = asClock(answerLeft);
+      clock.classList.toggle('ending', answerLeft <= 10);
+    }
+
+    /** Converts a number of seconds into the correct format a clock shows. */
+    function asClock(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      return minutes + ':' + String(seconds % 60).padStart(2, '0');
+    }
+
+    /** Shows the penalty clock, or hides it once it is over. */
+    function showPenalty() {
+      penaltyBox.classList.toggle('on', penaltyLeft > 0);
+      penaltyClock.textContent = asClock(penaltyLeft);
+      syncOpenCard();
+    }
+
+    // ----- CONQUEST OF THE PLACE -----
+
+    /** Syncs the attack state from the backend, and shows the question if it is time. */
+    async function syncAttack() {
+      if (!myPlaceId || !outpostsByPlaceId.has(myPlaceId)) {
+        attackState = null;
+        return;
+      }
+
+      try {
+        attackState = await getJson(
+          `${GAME_API}/api/outposts/attackState/${myPlaceId}`
+          + `?playerId=${encodeURIComponent(me.id)}`);
+      } catch (error) {
+        attackState = null;
+        return;
+      }
+
+      if (attackState.started && attackState.questionId && !attackState.answered
+          && (!openView || openView.kind !== 'question')) {
+        openView = { kind: 'question', placeId: myPlaceId };
+        showQuestion(myPlaceId, attackState);
+      }
+    }
+
+    /** Declares this player ready, or takes the declaration back. */
+    async function toggleReady(placeId) {
+      const action = (attackState && attackState.ready) ? 'leaveAttack' : 'joinAttack';
+      try {
+        const response = await fetch(
+          `${GAME_API}/api/outposts/${action}/${placeId}`
+          + `?playerId=${encodeURIComponent(me.id)}`,
+          { method: 'POST' });
+        if (!response.ok) throw new Error(await problemOf(response));
+
+        attackState = await response.json();
+        if (attackState.started && attackState.questionId) {
+          openView = { kind: 'question', placeId };
+          showQuestion(placeId, attackState);
+        } else {
+          renderDetails(placeId);
+        }
+      } catch (error) {
+        const box = document.getElementById('why');
+        if (box) box.innerHTML = `<span class="error">${error.message}</span>`;
+      }
+    }
+
+    // ----- CARDS -----
+
+    /** Shows the card about the specified outpost. */
+    function openCard(html, state, underAttack) {
+      card.className = 'card state-' + (underAttack ? 'underAttack' : (state || 'neutral'));
+      card.innerHTML = html;
+      overlay.classList.add('open');
+    }
+
+    /** Syncs the open card when it is showing the details of an outpost. */
+    function syncOpenCard() {
+      if (!openView) return;
+      if (openView.kind === 'question') {
+        if (attackState && !attackState.finished) {
+          answerLeft = attackState.secondsLeftToAnswer || 0;
+          paintAnswerClock();
+        } else if (attackState && attackState.finished) {
+          myAnswer = myAnswer || {
+            correct: false,
+            timedOut: true,
+            correctOptionIndex: attackState.correctOptionIndex,
+            explanation: attackState.explanation || '',
+          };
+          openView = { kind: 'waiting', placeId: openView.placeId };
+          renderWaiting(openView.placeId);
+        }
+        return;
+      }
+      if (openView.kind === 'details') {
+        renderDetails(openView.placeId);
+      } else if (openView.kind === 'waiting') {
+        renderWaiting(openView.placeId);
+      }
+    }
+
+    /** Closes the card. */
+    function closeCard() {
+      overlay.classList.remove('open');
+
+      if (openView && openView.kind === 'waiting') {
+        const placeId = openView.placeId;
+        fetch(`${GAME_API}/api/outposts/resetAttempt/${placeId}`, { method: 'POST' })
+          .catch((error) => console.warn('Could not reset the attempt:', error.message));
+      }
+      openView = null;
+      myAnswer = null;
+      myQuestion = null;
+      resultUnlocksAt = null;
+      resultFinal = false;
+      resultOutcome = '';
+    }
+
+    function openOutpost(placeId) {
+      openView = { kind: 'details', placeId };
+      renderDetails(placeId);
+    }
+
+    /** Draws the details of an outpost and decides whether it can be attacked. */
+    function renderDetails(placeId) {
+      const place = allPlacesById.get(placeId);
+      const outpost = outpostsByPlaceId.get(placeId);
+      const title = place ? (place.name || place.id) : placeId;
+
+      if (!outpost) {
+        openCard(
+          `<h2>${title}</h2>` +
+          `<div class="meta">This place has no topics assigned yet.</div>` +
+          `<div class="why">An administrator has to assign them before it can be played.</div>` +
+          `<button class="close" onclick="closeCard()">Close</button>`,
+          'neutral', false
+        );
+        return;
+      }
+
+      const state = outpost.state;
+      const heldByUs = state === me.team;
+      const noQuestions = !outpost.topicNames || outpost.topicNames.length === 0;
+      const busy = underAttackIds.includes(placeId);
+      const serving = penaltyLeft > 0;
+      const movement = movementInProgress();
+      const standingHere = myPlaceId === placeId;
+      const offeredByProcess = !movement && standingHere;
+      const required = outpost.requiredPlayers;
+      const here = standingHere ? attackState : null;
+      const readyCount = here ? here.readyCount : 0;
+      const iAmReady = here ? here.ready : false;
+      const groupStarted = here ? here.started : false;
+      const theirGroup = here && here.team && here.team !== me.team;
+      const canAttack = offeredByProcess && !heldByUs && !noQuestions
+        && !busy && !serving && !matchOver && !groupStarted && !theirGroup;
+
+      let why = '';
+      if (matchOver) why = 'The match is over.';
+      else if (theirGroup) why = 'The other team is already gathering on this outpost.';
+      else if (serving) why = 'A wrong answer costs you a wait. Watch the clock.';
+      else if (movement) why = 'You are still travelling: ' + movement.message + '.';
+      else if (!standingHere) why = 'You can only attack the outpost you are standing in.';
+      else if (groupStarted) why = 'The questions have been handed out.';
+      else if (busy) why = 'Somebody is answering for this outpost right now.';
+      else if (heldByUs) why = 'Your team already holds this outpost.';
+      else if (noQuestions) why = 'No topic is assigned to this outpost.';
+      else if (required > 1 && here && !theirGroup) why = here.message;
+      else if (required > 1 && !standingHere)
+        why = 'This outpost needs ' + required + ' players of the same team.';
+
+      const topics = (outpost.topicNames || []).join(', ') || 'none';
+
+      let label = 'Conquer';
+      if (serving) label = asClock(penaltyLeft);
+      else if (theirGroup) label = 'Taken';
+      else if (required > 1 && iAmReady) label = 'Cancel (' + readyCount + '/' + required + ' ready)';
+      else if (required > 1) label = 'Conquer (' + readyCount + '/' + required + ' ready)';
+
+      openCard(
+        `<h2>${title}</h2>` +
+        `<div class="meta">Held by ${OWNER_LABEL[state] || state}` +
+          (busy ? ' &middot; under attack' : '') + `</div>` +
+        `<div class="facts">` +
+          `<div><span class="label">Difficulty:</span> ${outpost.difficulty}</div>` +
+          `<div><span class="label">Players required:</span> ${required}</div>` +
+          `<div><span class="label">Topics:</span> ${topics}</div>` +
+        `</div>` +
+        (offeredByProcess
+          ? `<button class="attack" id="attackButton" `
+            + `${(canAttack || iAmReady) ? '' : 'disabled'}>${label}</button>`
+          : '') +
+        `<div class="why" id="why">${why}</div>` +
+        `<button class="close" onclick="closeCard()">Close</button>`,
+        state, busy
+      );
+
+      if (canAttack || iAmReady) {
+        document.getElementById('attackButton')
+          .addEventListener('click', () => toggleReady(placeId));
+      }
+    }
+
+    /** Draws the question this player was given. */
+    function showQuestion(placeId, state) {
+      const place = allPlacesById.get(placeId);
+      const title = place ? (place.name || place.id) : placeId;
+      const outpost = outpostsByPlaceId.get(placeId);
+      const colour = outpost ? outpost.state : 'neutral';
+
+      const optionsHtml = state.options
+        .map((option, index) =>
+          `<button class="option" data-index="${index}">${option}</button>`)
+        .join('');
+
+      answerLeft = state.secondsLeftToAnswer || 0;
+      myQuestion = { text: state.text, options: state.options };
+
+      openCard(
+        `<h2><span class="answer-clock" id="answerClock">${asClock(answerLeft)}</span>` +
+          `${title}</h2>` +
+        `<div class="meta">Topic: ${state.topicName} &middot; difficulty ${state.difficulty}` +
+          (state.required > 1 ? ` &middot; ${state.required} players` : '') +
+          ` &middot; ${state.secondsToAnswer}s to answer</div>` +
+        `<div class="question">${state.text}</div>` +
+        `<div id="options">${optionsHtml}</div>` +
+        `<div class="result" id="result"></div>` +
+        `<button class="close" onclick="closeCard()">Close</button>`,
+        colour, true
+      );
+
+      for (const button of card.querySelectorAll('.option')) {
+        button.addEventListener('click', () =>
+          submitAnswer(placeId, state.questionId, Number(button.dataset.index)));
+      }
+    }
+
+    /** The screen a player sees between their own answer and the group's. */
+    function renderWaiting(placeId) {
+      const place = allPlacesById.get(placeId);
+      const outpost = outpostsByPlaceId.get(placeId);
+      const title = place ? (place.name || place.id) : placeId;
+      const colour = outpost ? outpost.state : 'neutral';
+
+      const answer = myAnswer || {};
+
+      const answered = attackState
+        ? attackState.answeredCount + (attackState.answered ? 0 : 1) : 1;
+      const missing = attackState
+        ? Math.max(attackState.required - answered, 0) : 0;
+
+      if (!resultFinal
+          && (!attackState || attackState.finished || missing === 0)) {
+        resultFinal = true;
+        resultOutcome = (attackState && attackState.message)
+          || 'The conquest is over.';
+        resultUnlocksAt = Date.now() + RESULT_LOCK_MS;
+      }
+
+      const lockLeft = resultUnlocksAt
+        ? Math.max(Math.ceil((resultUnlocksAt - Date.now()) / 1000), 0) : 0;
+      const locked = !resultFinal || lockLeft > 0;
+
+      let review = '';
+      if (myQuestion) {
+        review = `<div class="review-question">${myQuestion.text}</div>`;
+
+        if (answer.timedOut) {
+          review += `<div class="review-option wrong">`
+            + `<span>No answer given</span><span class="tag">out of time</span></div>`;
+        } else {
+          review += `<div class="review-option ${answer.correct ? 'right' : 'wrong'}">`
+            + `<span>${myQuestion.options[answer.chosenIndex]}</span>`
+            + `<span class="tag">your answer</span></div>`;
+        }
+
+        if (!answer.correct && answer.correctOptionIndex != null) {
+          review += `<div class="review-option right">`
+            + `<span>${myQuestion.options[answer.correctOptionIndex]}</span>`
+            + `<span class="tag">correct answer</span></div>`;
+        }
+      }
+
+      const penalty = answer.penaltySeconds
+        || (answer.correct === false ? penaltyLeft : 0);
+      const penaltyBanner = (resultFinal && penalty > 0)
+        ? `<div class="penalty-note">`
+          + (answer.timedOut
+              ? 'You did not answer in time: '
+              : 'You answered wrongly: ')
+          + `you cannot attack for ${penalty} seconds.</div>`
+        : '';
+
+      const footer = resultFinal
+        ? `<div class="settled">${resultOutcome}</div>` + penaltyBanner
+        : `<div class="pending">The outpost is undecided: waiting for `
+          + `${missing} more answer(s).</div>`;
+
+      openCard(
+        `<h2>${title}</h2>` +
+        `<div class="verdict ${answer.correct ? 'right' : 'wrong'}">` +
+          (answer.correct ? 'Right answer'
+            : (answer.timedOut ? 'Out of time' : 'Wrong answer')) + `</div>` +
+        review +
+        `<div class="explanation">${answer.explanation || ''}</div>` +
+        footer +
+        `<button class="close" ${locked ? 'disabled' : ''} onclick="closeCard()">` +
+          (resultFinal
+            ? (lockLeft > 0 ? `Close (${lockLeft})` : 'Close')
+            : 'Waiting for the others') + `</button>`,
+        colour, !resultFinal
+      );
+    }
+
+    /** Sends the chosen option and shows the outcome. */
+    async function submitAnswer(placeId, questionId, optionIndex) {
+      const buttons = [...card.querySelectorAll('.option')];
+      for (const button of buttons) button.disabled = true;
+      const resultBox = document.getElementById('result');
+      resultBox.textContent = 'Checking...';
+
+      try {
+        const response = await fetch(
+          `${GAME_API}/api/outposts/answer/${placeId}`
+          + `?playerId=${encodeURIComponent(me.id)}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ questionId, optionIndex }),
+          });
+        if (!response.ok) throw new Error(await problemOf(response));
+
+        const result = await response.json();
+
+        myAnswer = {
+          correct: result.correct,
+          chosenIndex: optionIndex,
+          correctOptionIndex: result.correctOptionIndex,
+          explanation: result.explanation,
+          penaltySeconds: result.penaltySeconds,
+        };
+        openView = { kind: 'waiting', placeId };
+        await syncAttack();
+        renderWaiting(placeId);
+      } catch (error) {
+        resultBox.innerHTML = `<span class="error">${error.message}</span>`;
+        for (const button of buttons) button.disabled = false;
+      }
+    }
+
+    document.getElementById('backToLobby').addEventListener('click', backToLobby);
+
+    document.getElementById('meLabel').textContent = me.nickname;
+    teamBadge.textContent = OWNER_LABEL[me.team] || me.team;
+    teamBadge.className = 'badge ' + me.team;
+
+    refresh();
+    setInterval(refresh, REFRESH_MS);
+
+    setInterval(() => {
+      if (penaltyLeft > 0) {
+        penaltyLeft--;
+        showPenalty();
+      }
+      if (answerLeft > 0 && openView && openView.kind === 'question') {
+        answerLeft--;
+        paintAnswerClock();
+      }
+      if (matchLeft > 0) {
+        matchLeft--;
+        paintMatchClock();
+      }
+      if (lobbyUnlocksAt && Date.now() < lobbyUnlocksAt + 1000) {
+        paintLobbyButton();
+      }
+      if (openView && openView.kind === 'waiting' && resultUnlocksAt
+          && Date.now() < resultUnlocksAt + 1000) {
+        renderWaiting(openView.placeId);
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Outpost topics</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    body { margin: 0; font-family: "Segoe UI", Tahoma, sans-serif; color: #13213a; }
+    .layout { display: flex; height: 100vh; }
+    #map { flex: 1; height: 100vh; }
+    .panel {
+      width: 290px; flex: 0 0 290px;
+      border-left: 1px solid #d6deeb; background: #f7f9fc;
+      padding: 14px; overflow-y: auto;
+    }
+    .panel h2 { font-size: 17px; margin: 0 0 4px; }
+    .hint { color: #55637d; font-size: 13px; }
+    .facts { margin: 12px 0; font-size: 14px; }
+    .facts div { margin-bottom: 3px; }
+    .topic { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 14px; }
+    button { padding: 8px 12px; font-size: 14px; cursor: pointer; width: 100%; margin-top: 12px; }
+    #backButton {
+      margin-top: 0; margin-bottom: 12px;
+      background: #e8edf6; border: 1px solid #c3cfe3; border-radius: 4px;
+    }
+    #status { margin-top: 10px; font-size: 13px; min-height: 18px; }
+    #status.ok { color: #0a7f3f; }
+    #status.err { color: #b42318; }
+    .assigned { color: #0a7f3f; font-size: 12px; }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <div id="map"></div>
+
+    <div class="panel">
+      <button id="backButton" type="button">&#8592; Admin</button>
+
+      <h2 id="placeTitle">No place selected</h2>
+      <div class="hint" id="placeHint">Click a place on the map to assign its topics.</div>
+
+      <div class="facts" id="placeFacts"></div>
+
+      <div id="topicList"></div>
+
+      <button id="saveButton" type="button" disabled>Save topics</button>
+      <div id="status"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const GAME_API = 'http://localhost:8080';
+
+    const PLACES_API = '/api/environment/pp';
+    const VIEW_API = '/api/environment/maps/views';
+
+    const DEFAULT_MAX_TOPICS = 3;
+
+    const OUTPOST_VIEW = 'Outposts';
+
+    const FIXED_ZOOM = 18;
+
+    const READY_STYLE = { color: '#0a7f3f', weight: 2, fillColor: '#0a7f3f', fillOpacity: 0.22 };
+    const MISSING_STYLE = { color: '#b42318', weight: 2, fillColor: '#b42318', fillOpacity: 0.18 };
+    const NORMAL_STYLE = { color: '#3b6fd4', weight: 2, fillOpacity: 0.15 };
+    const SELECTED_STYLE = { color: '#e07a1f', weight: 3, fillOpacity: 0.35 };
+    const DISABLED_STYLE = { color: '#9aa5b6', weight: 1, fillOpacity: 0.08, dashArray: '4 4' };
+
+    const map = L.map('map', {
+      zoomControl: true,
+      scrollWheelZoom: true,
+      touchZoom: true,
+      dragging: true,
+      doubleClickZoom: false,
+      touchZoom: false,
+      boxZoom: false,
+      keyboard: false,
+      maxBoundsViscosity: 1.0,
+    }).setView([43.139, 13.067], FIXED_ZOOM);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 22,
+      minZoom: 18,
+      maxNativeZoom: 18,
+    }).addTo(map);
+
+    const polygonsByPlaceId = new Map();
+    let outpostPlaceIds = [];
+    const topicCountByPlaceId = new Map();
+    let allTopics = [];
+    let selectedPlace = null;
+    let maxTopics = DEFAULT_MAX_TOPICS;
+
+    const ADMIN_URL = 'http://localhost:3000/';
+
+    /** Goes back to the page the admin came from. */
+    function goBackToAdmin() {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = ADMIN_URL;
+      }
+    }
+
+    const placeTitle = document.getElementById('placeTitle');
+    const placeHint = document.getElementById('placeHint');
+    const placeFacts = document.getElementById('placeFacts');
+    const topicList = document.getElementById('topicList');
+    const saveButton = document.getElementById('saveButton');
+    const statusLabel = document.getElementById('status');
+
+    function showStatus(message, isError) {
+      statusLabel.textContent = message;
+      statusLabel.className = isError ? 'err' : 'ok';
+    }
+
+    /** Reads one attribute of a place, accepting a missing or empty value. */
+    function attribute(place, key, fallback) {
+      const value = place.attributes ? place.attributes[key] : null;
+      return value === null || value === undefined || value === '' ? fallback : value;
+    }
+
+    /** Loads which places belong to the outpost view. */
+    async function loadOutpostPlaceIds() {
+      const response = await fetch(`${VIEW_API}/${OUTPOST_VIEW}/places`);
+      const body = await response.json();
+      if (!body.success) throw new Error(body.message);
+      outpostPlaceIds = body.data;
+    }
+
+    /** Draws every place of the deployed environment on the map. */
+    async function loadPlaces() {
+      const response = await fetch(PLACES_API);
+      const body = await response.json();
+      if (!body.success) throw new Error(body.message);
+
+      const bounds = [];
+      for (const place of body.data) {
+        const coordinates = Array.isArray(place.coordinates) ? place.coordinates : [];
+        if (coordinates.length < 3) continue;
+
+        const latLngs = coordinates.map((point) => [point[1], point[0]]);
+        bounds.push(...latLngs);
+
+        const isOutpost = outpostPlaceIds.includes(place.id);
+        const polygon = L.polygon(
+          latLngs,
+          isOutpost ? styleForPlace(place.id) : DISABLED_STYLE
+        ).addTo(map);
+        const assigned = topicCountByPlaceId.get(place.id) || 0;
+        polygon.bindTooltip(
+          isOutpost
+            ? `${place.name || place.id} - ${assigned === 0 ? 'no topic yet' : assigned + ' topics'}`
+            : `${place.name || place.id} - not an outpost`
+        );
+        if (isOutpost) {
+          polygon.on('click', () => selectPlace(place));
+          polygonsByPlaceId.set(place.id, polygon);
+        }
+      }
+      if (bounds.length > 0) {
+        map.setView(L.latLngBounds(bounds).getCenter(), FIXED_ZOOM);
+      }
+    }
+
+    /** Reads how many topics each place already has. */
+    async function loadTopicCounts() {
+      const response = await fetch(`${GAME_API}/api/outposts/getAllOutposts`);
+      if (!response.ok) throw new Error('The game backend answered ' + response.status);
+      const outposts = await response.json();
+      for (const outpost of outposts) {
+        topicCountByPlaceId.set(outpost.placeId, (outpost.topicIds || []).length);
+      }
+    }
+
+    /** Green when the place has topics, red when it still needs them. */
+    function styleForPlace(placeId) {
+      return (topicCountByPlaceId.get(placeId) || 0) > 0 ? READY_STYLE : MISSING_STYLE;
+    }
+
+    /** Loads every topic of the game, to offer them for assignment. */
+    async function loadTopics() {
+      const response = await fetch(`${GAME_API}/api/topics/getAllTopics`);
+      if (!response.ok) throw new Error('The game backend answered ' + response.status);
+      allTopics = await response.json();
+    }
+
+    /** Reads the topics already assigned to a place. */
+    async function loadAssignedTopicIds(placeId) {
+      const response = await fetch(`${GAME_API}/api/outposts/getOutpostByPlace/${placeId}`);
+      if (response.status === 404) return [];
+      if (!response.ok) throw new Error('The game backend answered ' + response.status);
+      const outpost = await response.json();
+      return outpost.topicIds || [];
+    }
+
+    /** Highlights the chosen place and fills the panel on the right. */
+    async function selectPlace(place) {
+      selectedPlace = place;
+      showStatus('', false);
+
+      for (const [placeId, polygon] of polygonsByPlaceId) {
+        polygon.setStyle(styleForPlace(placeId));
+      }
+      const chosen = polygonsByPlaceId.get(place.id);
+      if (chosen) {
+        chosen.setStyle(SELECTED_STYLE);
+        chosen.bringToFront();
+      }
+
+      maxTopics = Number(attribute(place, 'maxTopics', DEFAULT_MAX_TOPICS));
+      if (!Number.isFinite(maxTopics) || maxTopics < 1) maxTopics = DEFAULT_MAX_TOPICS;
+
+      placeTitle.textContent = place.name ? `${place.name} (${place.id})` : place.id;
+      placeHint.textContent = `Choose up to ${maxTopics} topics.`;
+      placeFacts.innerHTML =
+        `<div>Name saved in the database: ${place.name || place.id}</div>` +
+        `<div>Difficulty: ${attribute(place, 'difficulty', 'not set')}</div>` +
+        `<div>Required players: ${attribute(place, 'requiredPlayers', 'not set')}</div>` +
+        `<div>Max topics: ${attribute(place, 'maxTopics', DEFAULT_MAX_TOPICS + ' (default)')}</div>`;
+
+      topicList.innerHTML = '<div class="hint">Loading topics...</div>';
+      try {
+        const assignedIds = await loadAssignedTopicIds(place.id);
+        renderTopics(assignedIds);
+        saveButton.disabled = false;
+      } catch (error) {
+        topicList.innerHTML = '';
+        saveButton.disabled = true;
+        showStatus('Could not read the assignment: ' + error.message, true);
+      }
+    }
+
+    /** Draws one checkbox per topic, ticking the ones already assigned. */
+    function renderTopics(assignedIds) {
+      topicList.innerHTML = '';
+      for (const topic of allTopics) {
+        const row = document.createElement('label');
+        row.className = 'topic';
+
+        const box = document.createElement('input');
+        box.type = 'checkbox';
+        box.value = topic.id;
+        box.checked = assignedIds.includes(topic.id);
+        box.addEventListener('change', enforceMaximum);
+
+        const text = document.createElement('span');
+        text.textContent = `${topic.name} (${(topic.questions || []).length} questions)`;
+
+        row.appendChild(box);
+        row.appendChild(text);
+        if (box.checked) {
+          const mark = document.createElement('span');
+          mark.className = 'assigned';
+          mark.textContent = 'assigned';
+          row.appendChild(mark);
+        }
+        topicList.appendChild(row);
+      }
+      enforceMaximum();
+    }
+
+    /**
+     * Disables the checkboxes when the maximum number of topics is reached,
+     * and shows how many topics are currently chosen.
+     */
+    function enforceMaximum() {
+      const boxes = [...topicList.querySelectorAll('input[type=checkbox]')];
+      const chosen = boxes.filter((box) => box.checked).length;
+      for (const box of boxes) {
+        box.disabled = !box.checked && chosen >= maxTopics;
+      }
+      showStatus(`${chosen} of ${maxTopics} chosen`, false);
+    }
+
+    /** Sends the chosen topics to the game backend. */
+    async function save() {
+      if (!selectedPlace) return;
+      const topicIds = [...topicList.querySelectorAll('input[type=checkbox]')]
+        .filter((box) => box.checked)
+        .map((box) => Number(box.value));
+
+      const payload = {
+        placeId: selectedPlace.id,
+        placeName: selectedPlace.name || selectedPlace.id,
+        difficulty: Number(attribute(selectedPlace, 'difficulty', 1)),
+        requiredPlayers: Number(attribute(selectedPlace, 'requiredPlayers', 1)),
+        maxTopics: maxTopics,
+        topicIds: topicIds,
+      };
+
+      try {
+        const response = await fetch(
+          `${GAME_API}/api/outposts/assignTopics/${selectedPlace.id}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          }
+        );
+        if (!response.ok) {
+          const problem = await response.json().catch(() => null);
+          throw new Error(problem && problem.error ? problem.error : 'status ' + response.status);
+        }
+        showStatus('Topics saved', false);
+        topicCountByPlaceId.set(selectedPlace.id, topicIds.length);
+        const polygon = polygonsByPlaceId.get(selectedPlace.id);
+        if (polygon) polygon.setStyle(SELECTED_STYLE);
+      } catch (error) {
+        showStatus('Could not save: ' + error.message, true);
+      }
+    }
+
+    document.getElementById('backButton').addEventListener('click', goBackToAdmin);
+    saveButton.addEventListener('click', save);
+
+    (async () => {
+      try {
+        await loadOutpostPlaceIds();
+        await loadTopicCounts();
+        await loadPlaces();
+        if (outpostPlaceIds.length === 0) {
+          showStatus(
+            `No place belongs to the "${OUTPOST_VIEW}" view: check the view name `
+            + 'and that the map is deployed.', true);
+        }
+      } catch (error) {
+        showStatus('Could not load the map: ' + error.message, true);
+      }
+      try {
+        await loadTopics();
+      } catch (error) {
+        showStatus('Could not load the topics: ' + error.message, true);
+      }
+    })();
+  </script>
+</body>
+</html>
