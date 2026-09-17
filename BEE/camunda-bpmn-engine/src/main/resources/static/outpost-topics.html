@@ -51,8 +51,8 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="config.js"></script>
   <script>
-    const GAME_API = 'http://localhost:8080';
 
     const PLACES_API = '/api/environment/pp';
     const VIEW_API = '/api/environment/maps/views';
@@ -94,8 +94,6 @@
     let allTopics = [];
     let selectedPlace = null;
     let maxTopics = DEFAULT_MAX_TOPICS;
-
-    const ADMIN_URL = 'http://localhost:3000/';
 
     /** Goes back to the page the admin came from. */
     function goBackToAdmin() {

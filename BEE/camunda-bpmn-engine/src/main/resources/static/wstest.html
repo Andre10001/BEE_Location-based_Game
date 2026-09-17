@@ -18,7 +18,8 @@
     function testConnection() {
         log('Testing connection...');
 
-        const wsUrl = 'ws://localhost:8082/ws/gps?userId=test&businessKey=test123';
+        const wsProtocol = location.protocol === 'https:' ? 'wss' : 'ws';
+        const wsUrl = wsProtocol + '://' + location.host + '/ws/gps?userId=test&businessKey=test123';
         log('Connecting to: ' + wsUrl);
 
         try {

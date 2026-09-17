@@ -363,7 +363,8 @@
       ws.close();
     }
 
-    const wsUrl = `ws://localhost:8082/ws/gps?userId=${encodeURIComponent(userId)}&businessKey=${encodeURIComponent(businessKey)}`;
+    const wsProtocol = location.protocol === 'https:' ? 'wss' : 'ws';
+    const wsUrl = `${wsProtocol}://${location.host}/ws/gps?userId=${encodeURIComponent(userId)}&businessKey=${encodeURIComponent(businessKey)}`;
 
     log(`Connecting to WebSocket...`, 'info');
     log(`URL: ${wsUrl}`, 'info');

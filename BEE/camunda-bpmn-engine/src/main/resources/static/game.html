@@ -219,8 +219,8 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="config.js"></script>
   <script>
-    const GAME_API = 'http://localhost:8080';
 
     const PLACES_API = '/api/environment/pp';
     const VIEW_API = '/api/environment/maps/views';
@@ -1006,6 +1006,41 @@
         renderWaiting(openView.placeId);
       }
     }, 1000);
+
+    // ----- GPS -----
+    const GPS_SEND_MS = 3000;
+    let lastGpsSend = 0;
+
+    function sendMyPosition(gps) {
+      const now = Date.now();
+      if (now - lastGpsSend < GPS_SEND_MS) return;
+      lastGpsSend = now;
+
+      fetch(`${PARTICIPANTS_API}/${encodeURIComponent(me.beeParticipantId)}/position/coordinates`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          latitude: gps.coords.latitude,
+          longitude: gps.coords.longitude,
+        }),
+      }).catch((error) => console.error('Position not sent:', error));
+    }
+
+    function gpsProblem(error) {
+      whereLabel.textContent = 'GPS not available: ' + error.message;
+    }
+    
+    if (me && me.team && me.beeParticipantId) {
+      if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(sendMyPosition, gpsProblem, {
+          enableHighAccuracy: true,
+          maximumAge: 5000,
+          timeout: 15000,
+        });
+      } else {
+        whereLabel.textContent = 'This device has no GPS support.';
+      }
+    }
   </script>
 </body>
 </html>

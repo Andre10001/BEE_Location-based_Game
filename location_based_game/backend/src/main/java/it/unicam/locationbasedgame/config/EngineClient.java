@@ -1,6 +1,7 @@
 package it.unicam.locationbasedgame.config;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -21,7 +22,8 @@ public class EngineClient {
     private static final DateTimeFormatter ENGINE_DATE =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
-    private static final String ENGINE_BASE_URL = "http://localhost:8082";
+    @Value("${engine.base-url:http://localhost:8082}")
+    private String engineBaseUrl;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -34,7 +36,7 @@ public class EngineClient {
     public String findInstanceId(String businessKey) {
         try {
             List<Object> instances = castList(restTemplate.getForObject(
-                    ENGINE_BASE_URL + "/engine-rest/process-instance?active=true&businessKey="
+                    engineBaseUrl + "/engine-rest/process-instance?active=true&businessKey="
                             + businessKey, List.class));
             if (instances == null || instances.isEmpty()) {
                 return null;
@@ -66,7 +68,7 @@ public class EngineClient {
         List<Object> jobs;
         try {
             jobs = castList(restTemplate.getForObject(
-                    ENGINE_BASE_URL + "/engine-rest/job?timers=true&processInstanceId=" + instanceId
+                    engineBaseUrl + "/engine-rest/job?timers=true&processInstanceId=" + instanceId
                             + "&activityId=" + activityId,
                     List.class));
         } catch (RestClientException e) {
@@ -101,7 +103,7 @@ public class EngineClient {
         List<Object> definitions;
         try {
             definitions = castList(restTemplate.getForObject(
-                    ENGINE_BASE_URL + "/engine-rest/process-definition?latestVersion=true",
+                    engineBaseUrl + "/engine-rest/process-definition?latestVersion=true",
                     List.class));
         } catch (RestClientException e) {
             throw new IllegalStateException("Could not reach the engine: " + e.getMessage());
@@ -113,7 +115,7 @@ public class EngineClient {
         Object definitionId = asMap(definitions.get(0)).get("id");
         try {
             Map<String, Object> answer = castMap(restTemplate.getForObject(
-                    ENGINE_BASE_URL + "/engine-rest/process-definition/" + definitionId + "/xml",
+                    engineBaseUrl + "/engine-rest/process-definition/" + definitionId + "/xml",
                     Map.class));
             Object xml = answer == null ? null : answer.get("bpmn20Xml");
             if (xml == null) {

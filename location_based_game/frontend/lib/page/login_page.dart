@@ -56,8 +56,8 @@ class _LoginPageState extends State<LoginPage> {
     String role = player.role.label;
     print("role: $role");
     final Widget nextPage = switch (player.role) {
-      Role.admin => AdminMenuPage(playerName: player.nickname),
-      Role.player => PlayerHomePage(nickname: player.nickname),
+      Role.admin => AdminMenuPage(playerName: player.nickname, playerId: player.id ?? ''),
+      Role.player => PlayerHomePage(nickname: player.nickname, playerId: player.id ?? ''),
     };
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => nextPage));
   }

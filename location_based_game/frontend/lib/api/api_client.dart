@@ -4,12 +4,13 @@ import 'package:http/http.dart' as http;
 
 /// Knows where the backend is and how to talk to it.
 class ApiClient {
+  static const String serverUrl = String.fromEnvironment('SERVER_URL', defaultValue: 'http://localhost:8090');
 
-  /* Address of the Spring Boot backend. (Different for Android: http://192.168.1.10:8080) */
-  static const String baseUrl = 'http://localhost:8080';
+  /* Address of the Spring Boot backend. */
+  static const String baseUrl = serverUrl;
 
   /* Address of BEE. */
-  static const String beeUrl = 'http://localhost:8082';
+  static const String beeUrl = serverUrl;
 
   /* Asks the backend for data and returns the decoded JSON. */
   static Future<dynamic> get(String path) async {
