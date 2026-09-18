@@ -107,7 +107,7 @@ public class EnvironmentMapService {
                 .writeValueAsString(result);
         Files.writeString(file, prettyJson, StandardCharsets.UTF_8);
 
-        log.info("[EnvironmentMapService] Map '{}' saved to {}", name, file.toAbsolutePath());
+        log.info("[EnvironmentMapService] Map '" + name + "' saved to " + file.toAbsolutePath());
     }
 
     /**
@@ -136,8 +136,7 @@ public class EnvironmentMapService {
                 participantDataService.loadParticipantsFromJsonContent(content, name);
 
         int placeCount = environmentDataService.getPhysicalPlaces().size();
-        log.info("[EnvironmentMapService] Map '{}' deployed: {} places, {} participants",
-                name, placeCount, participantCount);
+        log.info("[EnvironmentMapService] Map '" + name + "' deployed: " + placeCount + " places, " + participantCount + " participants");
 
         if (participantCount == 0) {
             return String.format(
@@ -165,7 +164,7 @@ public class EnvironmentMapService {
                 .findFirst();
  
         if (viewOpt.isEmpty()) {
-            log.warn("[EnvironmentMapService] View not found: {}", viewReference);
+            log.warn("[EnvironmentMapService] View not found: " + viewReference);
             return List.of();
         }
  

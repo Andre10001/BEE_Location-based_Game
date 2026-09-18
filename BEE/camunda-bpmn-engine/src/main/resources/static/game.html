@@ -285,8 +285,10 @@
     // ----- MAP -----
 
     const map = L.map('map', {
-      zoomControl: false,
-      scrollWheelZoom: false,
+      zoomControl: true,
+      scrollWheelZoom: true,
+      touchZoom: true,
+      dragging: true,
       doubleClickZoom: false,
       touchZoom: false,
       boxZoom: false,
@@ -296,7 +298,8 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
       maxZoom: 22,
-      maxNativeZoom: 19,
+      minZoom: 18,
+      maxNativeZoom: 18,
     }).addTo(map);
 
     const polygonsByPlaceId = new Map();
@@ -1029,7 +1032,7 @@
     function gpsProblem(error) {
       whereLabel.textContent = 'GPS not available: ' + error.message;
     }
-    
+
     if (me && me.team && me.beeParticipantId) {
       if (navigator.geolocation) {
         navigator.geolocation.watchPosition(sendMyPosition, gpsProblem, {

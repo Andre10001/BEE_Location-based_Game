@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.unicam.intermediate.models.dto.Response;
 import org.unicam.intermediate.models.pojo.PhysicalPlace;
 import org.unicam.intermediate.service.environmental.EnvironmentMapService;
+import org.unicam.intermediate.service.environmental.BpmnProcessService;
 import org.unicam.intermediate.service.environmental.EnvironmentDataService;
 
 import java.util.ArrayList;
@@ -29,6 +31,7 @@ public class EnvironmentMapController {
 
     private final EnvironmentMapService environmentMapService;
     private final EnvironmentDataService environmentDataService;
+    private final BpmnProcessService bpmnProcessService;
 
     @GetMapping
     public ResponseEntity<Response<List<String>>> listMaps() {
@@ -53,7 +56,7 @@ public class EnvironmentMapController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Response.error(e.getMessage()));
         } catch (Exception e) {
-            log.error("[Environment Maps API] Failed to read map: {}", name, e);
+            log.error("[Environment Maps API] Failed to read map: " + name, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Response.error("Failed to read map: " + e.getMessage()));
         }
@@ -64,7 +67,7 @@ public class EnvironmentMapController {
         try {
             return ResponseEntity.ok(Response.ok(environmentMapService.getPlaceIdsInView(viewReference)));
         } catch (Exception e) {
-            log.error("[Environment Maps API] Failed to read view: {}", viewReference, e);
+            log.error("[Environment Maps API] Failed to read view: " + viewReference, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Response.error("Failed to read view: " + e.getMessage()));
         }
@@ -83,21 +86,24 @@ public class EnvironmentMapController {
             }
             return ResponseEntity.ok(Response.ok(placeIds));
         } catch (Exception e) {
-            log.error("[Environment Maps API] Failed to read logical place: {}", reference, e);
+            log.error("[Environment Maps API] Failed to read logical place: " + reference, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Response.error("Failed to read logical place: " + e.getMessage()));
         }
     }
     
     @PostMapping("/{name}/deploy")
-    public ResponseEntity<Response<String>> deployMap(@PathVariable String name) {
+    public ResponseEntity<Response<String>> deployMap(@PathVariable String name,
+                                                      @RequestParam String process) {
         try {
-            String outcome = environmentMapService.deployMap(name);
+            String mapOutcome = environmentMapService.deployMap(name);
+            String processOutcome = bpmnProcessService.deployProcess(process);
+            String outcome = mapOutcome + " " + processOutcome;
             return ResponseEntity.ok(Response.ok(outcome));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Response.error(e.getMessage()));
         } catch (Exception e) {
-            log.error("[Environment Maps API] Failed to deploy map: {}", name, e);
+            log.error("[Environment Maps API] Failed to deploy map: " + name, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Response.error("Failed to deploy map: " + e.getMessage()));
         }
@@ -113,7 +119,7 @@ public class EnvironmentMapController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Response.error(e.getMessage()));
         } catch (Exception e) {
-            log.error("[Environment Maps API] Failed to save map: {}", name, e);
+            log.error("[Environment Maps API] Failed to save map: " + name, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Response.error("Failed to save map: " + e.getMessage()));
         }

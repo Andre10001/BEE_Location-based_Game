@@ -47,7 +47,11 @@
     <button id="loadButton" type="button">Load</button>
 
     <button id="saveButton" type="button">Save map</button>
-    <button id="deployButton" type="button">Deploy map</button>
+
+    <label for="bpmnProcesses">Process</label>
+    <select id="bpmnProcesses"><option value="">-- bpmn process --</option></select>
+
+    <button id="deployButton" type="button" disabled>Deploy map and process</button>
     <span id="status"></span>
   </div>
 
@@ -57,10 +61,20 @@
     import bpenvModeler from '/bpenv-modeler/bpenv-modeler.js';
 
     const MAPS_API = '/api/environment/maps';
+    const PROCESSES_API = '/api/environment/processes';
 
     const nameInput = document.getElementById('mapName');
     const mapSelect = document.getElementById('existingMaps');
     const statusLabel = document.getElementById('status');
+    const processSelect = document.getElementById('bpmnProcesses');
+    const deployButton = document.getElementById('deployButton');
+
+    let mapLoaded = false;
+
+    /** Deploys a loaded map and a chosen process. */
+    function updateDeployButton() {
+      deployButton.disabled = !(mapLoaded && processSelect.value !== '');
+    }
 
     /** Shows a short message on the right of the bar. */
     function showStatus(message, isError) {
@@ -106,6 +120,8 @@
           views: body.data.views ?? [],
         });
         nameInput.value = name;
+        mapLoaded = true;
+        updateDeployButton();
         showStatus(`Map "${name}" loaded`, false);
       } catch (error) {
         showStatus('Could not load the map: ' + error.message, true);
@@ -138,15 +154,26 @@
       }
     }
 
-    /** Deploys the map currently named in the box. */
+    /** Deploys the map currently named in the box and the chosen process. */
     async function deployMap() {
       const name = nameInput.value.trim();
       if (!name) {
         showStatus('Type the name of a saved map', true);
         return;
       }
+      if (!mapLoaded) {
+        showStatus('Load a map before deploying', true);
+        return;
+      }
+      const process = processSelect.value;
+      if (!process) {
+        showStatus('Choose a BPMN process', true);
+        return;
+      }
       try {
-        const response = await fetch(`${MAPS_API}/${name}/deploy`, { method: 'POST' });
+        const response = await fetch(
+          `${MAPS_API}/${name}/deploy?process=${encodeURIComponent(process)}`,
+          { method: 'POST' });
         const body = await response.json();
         if (!body.success) throw new Error(body.message);
         showStatus(body.data, false);
@@ -156,11 +183,33 @@
       }
     }
 
-    document.getElementById('deployButton').addEventListener('click', deployMap);
+    async function loadProcessList() {
+      try {
+        const response = await fetch(PROCESSES_API);
+        const body = await response.json();
+        if (!body.success) throw new Error(body.message);
+        for (const name of body.data) {
+          const option = document.createElement('option');
+          option.value = name;
+          option.textContent = name;
+          processSelect.appendChild(option);
+        }
+        if (body.data.length === 0) {
+          showStatus('No BPMN file found in the "bpmn processes" folder', true);
+        }
+      } catch (error) {
+        showStatus('Could not load the process list: ' + error.message, true);
+      }
+    }
+
+    processSelect.addEventListener('change', updateDeployButton);
+
+    deployButton.addEventListener('click', deployMap);
     document.getElementById('loadButton').addEventListener('click', loadSelectedMap);
     document.getElementById('saveButton').addEventListener('click', saveMap);
 
     loadMapList();
+    loadProcessList();
   </script>
 </body>
 </html>
