@@ -17,9 +17,12 @@ services:
 
   bee:
     build: ./BEE/camunda-bpmn-engine
-    command: ["--app.envs-dir=/app/envs"]
+    command:
+      - "--app.envs-dir=/app/envs"
+      - "--app.processes-dir=/app/processes"
     volumes:
       - ./BEE/camunda-bpmn-engine/src/main/resources/envs:/app/envs
+      - ./BEE/camunda-bpmn-engine/src/main/resources/bpmn-processes:/app/processes:ro
     ports:
       - "8082:8082"
     restart: on-failure

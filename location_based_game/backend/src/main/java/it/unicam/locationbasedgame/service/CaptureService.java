@@ -209,31 +209,47 @@ public class CaptureService implements ICaptureService {
      * Distributes the questions and locks the outpost.
      */
     private void begin(Outpost outpost, Attempt attempt) {
-        List<Question> questions = new ArrayList<>();
-        List<String> topics = new ArrayList<>();
+        List<Topic> usableTopics = new ArrayList<>();
         for (Topic topic : outpost.getTopics()) {
-            for (Question question : topic.getQuestions()) {
-                if (question.getDifficulty() == outpost.getDifficulty()) {
-                    questions.add(question);
-                    topics.add(topic.getName());
-                }
+            if (!questionsOfDifficulty(topic, outpost.getDifficulty()).isEmpty()) {
+                usableTopics.add(topic);
             }
         }
-        if (questions.isEmpty()) {
+        if (usableTopics.isEmpty()) {
             throw new IllegalArgumentException("No question of difficulty "
                     + outpost.getDifficulty() + " among the topics of this outpost");
         }
 
-        List<Integer> order = new ArrayList<>();
-        for (int i = 0; i < questions.size(); i++) order.add(i);
-        Collections.shuffle(order, random);
+        if (usableTopics.size() < attempt.ready.size()) {
+            throw new IllegalArgumentException("This outpost needs " + attempt.ready.size()
+                    + " different topics with questions of difficulty " + outpost.getDifficulty()
+                    + ", but only " + usableTopics.size() + " of them have one");
+        }
 
-        int next = 0;
+        List<Topic> drawnTopics = new ArrayList<>(usableTopics);
+        Collections.shuffle(drawnTopics, random);
+
+        Set<Long> alreadyGiven = new LinkedHashSet<>();
+        int nextTopic = 0;
         for (String playerId : attempt.ready) {
-            int index = order.get(next % order.size());
-            attempt.questionByPlayer.put(playerId, questions.get(index));
-            attempt.topicByPlayer.put(playerId, topics.get(index));
-            next++;
+            Topic topic = drawnTopics.get(nextTopic);
+            nextTopic++;
+            List<Question> questions = questionsOfDifficulty(topic, outpost.getDifficulty());
+
+            /* A question already given to somebody else is used again only when nothing is left. */
+            List<Question> free = new ArrayList<>();
+            for (Question question : questions) {
+                if (!alreadyGiven.contains(question.getId())) {
+                    free.add(question);
+                }
+            }
+            List<Question> choices = free.isEmpty() ? questions : free;
+
+            Question chosen = choices.get(random.nextInt(choices.size()));
+            alreadyGiven.add(chosen.getId());
+
+            attempt.questionByPlayer.put(playerId, chosen);
+            attempt.topicByPlayer.put(playerId, topic.getName());
         }
 
         attempt.started = true;
@@ -244,6 +260,26 @@ public class CaptureService implements ICaptureService {
         syncToBee(outpost);
 
         log.info("[Capture] Conquest of " + outpost.getPlaceId() + " begun with " + attempt.questionByPlayer.size() + " player(s)");
+    }
+
+    /**
+     * Gets all the questions of a topic having with a specific difficulty.
+     *
+     * @param topic the topic to look into
+     * @param difficulty the difficulty of the outpost
+     * @return the matching questions, empty when the topic has none
+     */
+    private List<Question> questionsOfDifficulty(Topic topic, int difficulty) {
+        List<Question> found = new ArrayList<>();
+        if (topic.getQuestions() == null) {
+            return found;
+        }
+        for (Question question : topic.getQuestions()) {
+            if (question.getDifficulty() == difficulty) {
+                found.add(question);
+            }
+        }
+        return found;
     }
 
     /**

@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../api/api_client.dart';
-import 'create_question_page.dart';
 import 'create_topic_page.dart';
 import '../../widget/pages_webview.dart';
 
@@ -71,14 +70,8 @@ class AdminMenuPage extends StatelessWidget {
             const SizedBox(height: 24),
             FilledButton.icon(
               icon: const Icon(Icons.folder_outlined),
-              label: const Text('Create topic'),
+              label: const Text('Topics and questions'),
               onPressed: () => _openPage(context, const CreateTopicPage()),
-            ),
-            const SizedBox(height: 12),
-            FilledButton.icon(
-              icon: const Icon(Icons.help_outline),
-              label: const Text('Create question'),
-              onPressed: () => _openPage(context, const CreateQuestionPage()),
             ),
             const SizedBox(height: 12),
             FilledButton.icon(

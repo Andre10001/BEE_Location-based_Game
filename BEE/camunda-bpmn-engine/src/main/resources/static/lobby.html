@@ -29,6 +29,7 @@
     button:disabled { cursor: default; opacity: .5; }
     button.primary { background: #2f6fd0; border-color: #2f6fd0; color: #fff; }
     button.quiet { background: #fff; color: #8f2222; border-color: #e3b8b8; }
+    button.leave { background: #fdecea; color: #8f2222; border-color: #b42318; }
 
     .teams { display: flex; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
     .team {
@@ -58,11 +59,6 @@
     <h1>Choose a team</h1>
     <p class="lead" id="who"></p>
 
-    <div class="field">
-      <label for="poolSelect">Which player of the process are you?</label>
-      <select id="poolSelect"><option value="">Loading...</option></select>
-    </div>
-
     <div class="teams">
       <div class="team team1">
         <h2>Team 1</h2>
@@ -81,11 +77,6 @@
     <div class="aside" id="sittingOut"></div>
 
     <button class="primary" id="startButton" disabled>Start the match</button>
-    <div class="row">
-      <button class="quiet" id="leaveButton" style="display:none;">
-        Leave the team and sit this one out
-      </button>
-    </div>
     <div class="notice" id="notice"></div>
   </div>
 
@@ -103,10 +94,18 @@
       location.replace('login.html');
     }
 
-    const poolSelect = document.getElementById('poolSelect');
+    const isAdmin = me !== null && me.role === 'admin';
+
     const startButton = document.getElementById('startButton');
-    const leaveButton = document.getElementById('leaveButton');
     const notice = document.getElementById('notice');
+    const button1 = document.getElementById('joinTeam1');
+    const button2 = document.getElementById('joinTeam2');
+
+    const POOL_NAMES = {
+      team1: ['Player1 Team1', 'Player2 Team1'],
+      team2: ['Player1 Team2', 'Player2 Team2'],
+    };
+    const PLAYERS_PER_TEAM = 2;
 
     async function getJson(url) {
       const response = await fetch(url, { cache: 'no-store' });
@@ -142,12 +141,8 @@
     /** Redraws the lobby from what the other players have chosen. */
     async function refresh() {
       let players;
-      let participants;
       try {
-        [players, participants] = await Promise.all([
-          getJson(`${GAME_API}/api/players/getAllPlayers`),
-          getBeeData(PARTICIPANTS_API),
-        ]);
+        players = await getJson(`${GAME_API}/api/players/getAllPlayers`);
       } catch (error) {
         setNotice('Cannot reach the game: ' + error.message, 'bad');
         return;
@@ -162,11 +157,13 @@
         return;
       }
 
-      drawPools(players, participants);
       drawTeams(players);
 
       if (await matchIsRunning()) {
-        if (me.team && me.beeParticipantId) {
+        if (isAdmin) {
+          startButton.disabled = true;
+          setNotice('The match is running.', 'good');
+        } else if (me.team && me.beeParticipantId) {
           location.replace('game.html');
         } else {
           startButton.disabled = true;
@@ -175,47 +172,11 @@
       }
     }
 
-    /** Lists the pools nobody else has taken. */
-    function drawPools(players, participants) {
-      const taken = new Set();
-      for (const player of players) {
-        if (player.beeParticipantId && player.id !== me.id) {
-          taken.add(player.beeParticipantId);
-        }
-      }
-
-      const free = participants.filter((participant) => !taken.has(participant.id));
-      const wanted = free.map((p) => p.id + '|' + (p.name || p.id)).join('||');
-      const shown = [...poolSelect.options]
-        .filter((option) => option.value)
-        .map((option) => option.value + '|' + option.textContent)
-        .join('||');
-
-      if (wanted !== shown) {
-        poolSelect.innerHTML = '';
-        const empty = document.createElement('option');
-        empty.value = '';
-        empty.textContent = participants.length === 0
-          ? 'No pool found: is the process deployed?'
-          : 'Choose your pool...';
-        poolSelect.appendChild(empty);
-
-        for (const participant of free) {
-          const option = document.createElement('option');
-          option.value = participant.id;
-          option.textContent = participant.name || participant.id;
-          poolSelect.appendChild(option);
-        }
-      }
-
-      poolSelect.value = me.beeParticipantId || '';
-    }
-
     /** Draws the two rosters and decides what the buttons may do. */
     function drawTeams(players) {
       const team1 = players.filter((player) => player.team === 'team1');
       const team2 = players.filter((player) => player.team === 'team2');
-      const sittingOut = players.filter((player) => !player.team);
+      const sittingOut = players.filter((player) => !player.team && player.role !== 'admin');
 
       fillRoster('team1List', team1);
       fillRoster('team2List', team2);
@@ -229,30 +190,29 @@
       const others1 = team1.filter((player) => player.id !== me.id).length;
       const others2 = team2.filter((player) => player.id !== me.id).length;
 
-      const button1 = document.getElementById('joinTeam1');
-      const button2 = document.getElementById('joinTeam2');
-      button1.disabled = me.team === 'team1' || others1 + 1 - others2 > 1;
-      button2.disabled = me.team === 'team2' || others2 + 1 - others1 > 1;
-      button1.textContent = me.team === 'team1' ? 'You are in team 1' : 'Join team 1';
-      button2.textContent = me.team === 'team2' ? 'You are in team 2' : 'Join team 2';
+      paintTeamButton(button1, 'team1', 'Join team 1', others1 + 1 - others2 > 1 || others1 >= PLAYERS_PER_TEAM);
+      paintTeamButton(button2, 'team2', 'Join team 2', others2 + 1 - others1 > 1 || others2 >= PLAYERS_PER_TEAM);
 
-      leaveButton.style.display = me.team ? 'block' : 'none';
+      if (isAdmin) {
+        button1.style.display = 'none';
+        button2.style.display = 'none';
+      }
 
       const playing = team1.concat(team2);
       const balanced = Math.abs(team1.length - team2.length) <= 1;
-      const everybodyReady = playing.every((player) => player.beeParticipantId);
       const enoughPlayers = playing.length >= 2;
+      const roomForEverybody = team1.length <= PLAYERS_PER_TEAM && team2.length <= PLAYERS_PER_TEAM;
 
-      startButton.disabled = !(balanced && everybodyReady && enoughPlayers);
+      startButton.disabled = !(balanced && enoughPlayers && roomForEverybody);
 
       if (!enoughPlayers) {
         setNotice('At least two players have to pick a side.', '');
       } else if (!balanced) {
         setNotice('The teams are not level yet.', 'bad');
-      } else if (!everybodyReady) {
-        setNotice('Somebody playing still has to pick their pool.', '');
-      } else if (!me.team) {
-        setNotice('Ready to start, but you are sitting this one out.', '');
+      } else if (!roomForEverybody) {
+        setNotice('A team can hold at most ' + PLAYERS_PER_TEAM + ' players.', 'bad');
+      } else if (!me.team && !isAdmin) {
+        setNotice('Ready to start, but you are not going to play this match.', '');
       } else {
         setNotice('Ready to start.', 'good');
       }
@@ -290,11 +250,8 @@
       }
     }
 
-    document.getElementById('joinTeam1').addEventListener('click', () => joinTeam('team1'));
-    document.getElementById('joinTeam2').addEventListener('click', () => joinTeam('team2'));
-
     /** Leaves the match being set up. */
-    leaveButton.addEventListener('click', async () => {
+    async function leaveTeam() {
       try {
         const response = await fetch(
           `${GAME_API}/api/players/leaveMatch/${me.id}`, { method: 'PUT' });
@@ -305,21 +262,19 @@
       } catch (error) {
         setNotice(error.message, 'bad');
       }
-    });
+    }
 
-    poolSelect.addEventListener('change', async () => {
-      try {
-        const response = await fetch(
-          `${GAME_API}/api/players/linkParticipant/${me.id}`
-          + `?participantId=${encodeURIComponent(poolSelect.value)}`,
-          { method: 'PUT' });
-        if (!response.ok) throw new Error(await problemOf(response));
-        remember(await response.json());
-        refresh();
-      } catch (error) {
-        setNotice(error.message, 'bad');
-      }
-    });
+    function paintTeamButton(button, team, joinText, tooManyPlayers) {
+      const inside = me.team === team;
+      button.textContent = inside ? 'Leave the team' : joinText;
+      button.className = inside ? 'leave' : '';
+      button.disabled = !inside && (Boolean(me.team) || tooManyPlayers);
+    }
+
+    button1.addEventListener('click',
+      () => (me.team === 'team1' ? leaveTeam() : joinTeam('team1')));
+    button2.addEventListener('click',
+      () => (me.team === 'team2' ? leaveTeam() : joinTeam('team2')));
 
     // ----- MATCH PREPARATION -----
 
@@ -355,6 +310,56 @@
       return pairing;
     }
 
+    /** Assigns a pool to every player of a team. */
+    async function assignPools(players) {
+      const participants = await getBeeData(PARTICIPANTS_API);
+
+      /* The pools are looked up by name, the way they are written in the process. */
+      const poolsByName = new Map();
+      for (const participant of participants) {
+        const name = String(participant.name || participant.id).toLowerCase();
+        poolsByName.set(name, participant);
+      }
+
+      /* Old pools are freed first, so nobody keeps a pool from the previous match. */
+      for (const player of players) {
+        if (player.beeParticipantId) {
+          await linkPool(player, '');
+        }
+      }
+
+      const playing = [];
+      for (const team of ['team1', 'team2']) {
+        const roster = players.filter((player) => player.team === team);
+        if (roster.length > POOL_NAMES[team].length) {
+          throw new Error(team + ' has more players than pools');
+        }
+
+        for (let index = 0; index < roster.length; index++) {
+          const poolName = POOL_NAMES[team][index];
+          const pool = poolsByName.get(poolName.toLowerCase());
+          if (!pool) {
+            throw new Error('the pool "' + poolName + '" is not in the deployed process');
+          }
+          playing.push(await linkPool(roster[index], pool.id));
+        }
+      }
+      return playing;
+    }
+
+    /** Links a pool to the player or frees it when the id is empty. */
+    async function linkPool(player, participantId) {
+      const response = await fetch(
+        `${GAME_API}/api/players/linkParticipant/${player.id}`
+        + `?participantId=${encodeURIComponent(participantId)}`,
+        { method: 'PUT' });
+      if (!response.ok) throw new Error(await problemOf(response));
+
+      const saved = await response.json();
+      if (saved.id === me.id) remember(saved);
+      return saved;
+    }
+
     startButton.addEventListener('click', async () => {
       startButton.disabled = true;
       setNotice('Reading the deployed map...', '');
@@ -364,8 +369,11 @@
           { method: 'POST' });
         if (!synced.ok) throw new Error(await problemOf(synced));
 
+        setNotice('Assigning the pools...', '');
+        const allPlayers = await getJson(`${GAME_API}/api/players/getAllPlayers`);
+        const players = await assignPools(allPlayers);
+
         setNotice('Starting the match...', '');
-        const players = await getJson(`${GAME_API}/api/players/getAllPlayers`);
         const pairing = await processByParticipant();
 
         let started = 0;
@@ -390,7 +398,9 @@
         }
 
         setNotice('Started ' + started + ' token(s).', 'good');
-        location.replace('game.html');
+        if (!isAdmin) {
+          location.replace('game.html');
+        }
       } catch (error) {
         setNotice('Could not start: ' + error.message, 'bad');
         startButton.disabled = false;
@@ -398,6 +408,12 @@
     });
 
     document.getElementById('who').textContent = 'Signed in as ' + me.nickname + '.';
+
+    if (isAdmin) {
+      document.querySelector('h1').textContent = 'Prepare the match';
+      document.getElementById('who').textContent =
+        'Signed in as ' + me.nickname + ' (administrator). You can start the match but not play it.';
+    }
     refresh();
     setInterval(refresh, REFRESH_MS);
   </script>

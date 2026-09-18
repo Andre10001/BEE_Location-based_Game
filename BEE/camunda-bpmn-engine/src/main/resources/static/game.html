@@ -7,20 +7,23 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     body { margin: 0; font-family: "Segoe UI", Tahoma, sans-serif; color: #13213a; }
-    #map { height: 100vh; width: 100%; }
+    #map { height: 100vh; height: 100dvh; width: 100%; }
+
+    .hud {
+      position: absolute; top: 0; left: 0; right: 0; z-index: 500;
+      display: flex; flex-wrap: wrap; align-items: flex-start;
+      gap: 8px; padding: 8px; box-sizing: border-box;
+      pointer-events: none;
+    }
+    .hud > * { pointer-events: auto; }
 
     .topbar {
-      position: absolute; top: 10px; left: 10px; z-index: 500;
       background: #fff; border: 1px solid #c3cfe3; border-radius: 6px;
-      padding: 8px 12px; display: flex; gap: 10px; align-items: center;
+      padding: 6px 10px; display: flex; gap: 8px; align-items: center;
       font-size: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.15);
-      flex-wrap: wrap; max-width: calc(100vw - 190px);
+      flex-wrap: wrap; flex: 1 1 auto; min-width: 0;
     }
-    .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
-    .sw-neutral { background: #9aa5b6; }
-    .sw-team1 { background: #2f6fd0; }
-    .sw-team2 { background: #d03b3b; }
-    .sw-me { background: #7b3fb5; }
+    .topbar > * { min-width: 0; overflow-wrap: anywhere; }
 
     .badge {
       padding: 2px 8px; border-radius: 10px; font-size: 13px;
@@ -32,10 +35,9 @@
     .where.stale { color: #b42318; }
 
     .clock {
-      position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
-      z-index: 500; background: #fff; border: 1px solid #c3cfe3;
-      border-radius: 6px; padding: 6px 18px; text-align: center;
-      box-shadow: 0 1px 4px rgba(0,0,0,.15);
+      background: #fff; border: 1px solid #c3cfe3;
+      border-radius: 6px; padding: 6px 14px; text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,.15); flex: 0 0 auto;
     }
     .clock-title { font-size: 11px; color: #55637d; text-transform: uppercase; }
     .clock-time {
@@ -51,8 +53,9 @@
     }
     .final.open { display: flex; }
     .final-card {
-      background: #fff; border-radius: 10px; padding: 28px 24px; text-align: center;
-      width: min(420px, 92vw); border-top: 8px solid #9aa5b6;
+      background: #fff; border-radius: 10px; padding: 24px 20px; text-align: center;
+      width: min(420px, 94vw); max-height: 85vh; max-height: 85dvh; overflow-y: auto;
+      border-top: 8px solid #9aa5b6;
     }
     .final-card.team1 { border-top-color: #2f6fd0; }
     .final-card.team2 { border-top-color: #d03b3b; }
@@ -71,10 +74,9 @@
     .final-note { font-size: 12px; color: #55637d; text-align: center; margin-top: 4px; }
 
     .penalty {
-      position: absolute; top: 10px; right: 10px; z-index: 500;
       background: #fff7e6; border: 1px solid #e8b31f; border-radius: 6px;
-      padding: 8px 14px; text-align: center; display: none;
-      box-shadow: 0 1px 4px rgba(0,0,0,.15);
+      padding: 6px 12px; text-align: center; display: none;
+      box-shadow: 0 1px 4px rgba(0,0,0,.15); flex: 0 0 auto;
     }
     .penalty.on { display: block; }
     .penalty-title { font-size: 12px; color: #8a6608; text-transform: uppercase; }
@@ -92,7 +94,7 @@
 
     .card {
       background: #fff; border-radius: 10px; padding: 20px;
-      width: min(520px, 92vw); max-height: 88vh; overflow-y: auto;
+      width: min(520px, 94vw); max-height: 85vh; max-height: 85dvh; overflow-y: auto;
       border-top: 7px solid #9aa5b6;
     }
     .card.state-neutral { border-top-color: #9aa5b6; background: #fbfcfd; }
@@ -169,31 +171,44 @@
     }
     .why { margin-top: 8px; font-size: 13px; color: #55637d; text-align: center; }
     .error { color: #b42318; }
+
+    .leaflet-top.leaflet-left { margin-top: 56px; }
+
+    @media (max-width: 600px) {
+      .topbar { flex: 1 1 100%; font-size: 13px; }
+      .clock { flex: 1 1 auto; padding: 4px 10px; }
+      .clock-time { font-size: 20px; }
+      .penalty { flex: 1 1 auto; padding: 4px 10px; }
+      .penalty-clock { font-size: 20px; }
+      .card { padding: 16px 14px; }
+      .card h2 { font-size: 17px; }
+      .question { font-size: 15px; }
+      .option { padding: 12px; font-size: 15px; }
+      .final-card { padding: 20px 16px; }
+      .final-card h2 { font-size: 20px; }
+      .leaflet-top.leaflet-left { margin-top: 96px; }
+    }
   </style>
 </head>
 
 <body>
-  <div class="topbar">
-    <strong id="meLabel"></strong>
-    <span class="badge" id="teamBadge">-</span>
-    <span class="where" id="whereLabel">position: unknown</span>
-    <span class="where" id="taskLabel">task: unknown</span>
-    <span class="where" id="statusLabel"></span>
-    <span><span class="swatch sw-neutral"></span> neutral</span>
-    <span><span class="swatch sw-team1"></span> team 1</span>
-    <span><span class="swatch sw-team2"></span> team 2</span>
-    <span><span class="swatch sw-me"></span> you</span>
-  </div>
+  <div class="hud">
+    <div class="topbar">
+      <strong id="meLabel"></strong>
+      <span class="badge" id="teamBadge">-</span>
+      <span class="where" id="statusLabel"></span>
+    </div>
 
-  <div class="clock" id="clockBox" style="display:none;">
-    <div class="clock-title">Time left</div>
-    <div class="clock-time" id="clockTime">--:--</div>
-    <div class="clock-score" id="clockScore"></div>
-  </div>
+    <div class="clock" id="clockBox" style="display:none;">
+      <div class="clock-title">Time left</div>
+      <div class="clock-time" id="clockTime">--:--</div>
+      <div class="clock-score" id="clockScore"></div>
+    </div>
 
-  <div class="penalty" id="penaltyBox">
-    <div class="penalty-title">Penalty</div>
-    <div class="penalty-clock" id="penaltyClock">0:00</div>
+    <div class="penalty" id="penaltyBox">
+      <div class="penalty-title">Penalty</div>
+      <div class="penalty-clock" id="penaltyClock">0:00</div>
+    </div>
   </div>
 
   <div id="map"></div>
@@ -285,10 +300,10 @@
     // ----- MAP -----
 
     const map = L.map('map', {
-      zoomControl: true,
       scrollWheelZoom: true,
       touchZoom: true,
       dragging: true,
+      zoomControl: false,
       doubleClickZoom: false,
       touchZoom: false,
       boxZoom: false,
@@ -298,8 +313,8 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
       maxZoom: 22,
-      minZoom: 18,
-      maxNativeZoom: 18,
+      minZoom: 15,
+      maxNativeZoom: 15,
     }).addTo(map);
 
     const polygonsByPlaceId = new Map();
@@ -328,8 +343,6 @@
     let matchOver = false;
     let attackState = null;
 
-    const whereLabel = document.getElementById('whereLabel');
-    const taskLabel = document.getElementById('taskLabel');
     const statusLabel = document.getElementById('statusLabel');
     const teamBadge = document.getElementById('teamBadge');
     const overlay = document.getElementById('overlay');
@@ -412,7 +425,6 @@
       await syncAttack();
       syncPolygons();
       syncMarker();
-      syncTaskLabel();
       syncOpenCard();
     }
 
@@ -437,14 +449,6 @@
       const text = raw ? String(raw) : null;
       const place = text ? (allPlacesById.get(text) || allPlacesByName.get(text)) : null;
       myPlaceId = place ? place.id : null;
-
-      if (place) {
-        whereLabel.textContent = 'position: ' + (place.name || place.id);
-      } else {
-        whereLabel.textContent = text
-          ? 'position: ' + text + ' (not on this map)'
-          : 'position: nowhere yet';
-      }
     }
 
     /** Syncs the polygons so the map matches the environment. */
@@ -522,18 +526,6 @@
         myMarker.bindTooltip(me.nickname);
       } else {
         myMarker.setLatLng(centre);
-      }
-    }
-
-    /** Says what the process is waiting for from this player. */
-    function syncTaskLabel() {
-      const movement = movementInProgress();
-      if (movement) {
-        taskLabel.textContent = 'task: ' + movement.message;
-      } else if (pendingActions.length > 0) {
-        taskLabel.textContent = 'task: ' + pendingActions[0].message;
-      } else {
-        taskLabel.textContent = 'task: none';
       }
     }
 
@@ -697,6 +689,16 @@
 
     // ----- CARDS -----
 
+    /** Shows the text that can create problems. */
+    function escapeHtml(value) {
+      const text = value === null || value === undefined ? '' : String(value);
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
     /** Shows the card about the specified outpost. */
     function openCard(html, state, underAttack) {
       card.className = 'card state-' + (underAttack ? 'underAttack' : (state || 'neutral'));
@@ -841,7 +843,7 @@
 
       const optionsHtml = state.options
         .map((option, index) =>
-          `<button class="option" data-index="${index}">${option}</button>`)
+          `<button class="option" data-index="${index}">${escapeHtml(option)}</button>`)
         .join('');
 
       answerLeft = state.secondsLeftToAnswer || 0;
@@ -1030,7 +1032,7 @@
     }
 
     function gpsProblem(error) {
-      whereLabel.textContent = 'GPS not available: ' + error.message;
+      setStatus('GPS not available: ' + error.message, true);
     }
 
     if (me && me.team && me.beeParticipantId) {
@@ -1041,7 +1043,7 @@
           timeout: 15000,
         });
       } else {
-        whereLabel.textContent = 'This device has no GPS support.';
+        setStatus('This device has no GPS support.', true);
       }
     }
   </script>
